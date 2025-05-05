@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dumbbell, Clock, Trophy, BookOpen, Dices, Calendar, BarChart, Settings, User } from "lucide-react"
+import { Dumbbell, Trophy, BookOpen, Dices, Calendar, User } from "lucide-react"
 import { motion } from "framer-motion"
 import { getUserRank, getNextRank, calculateProgressToNextRank } from "@/lib/user-utils"
 import { Progress } from "@/components/ui/progress"
@@ -71,12 +71,12 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
       <motion.div variants={fadeIn} className="col-span-full md:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome back, {userName}</CardTitle>
+            <CardTitle className="text-2xl">Welcome back, {userName} 👋</CardTitle>
             <CardDescription>{formattedDate}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <Clock className="h-10 w-10 text-primary" />
+              <div className="text-4xl">⏰</div>
               <div className="text-3xl font-bold">{formattedTime}</div>
             </div>
             <p className="mt-4">
@@ -102,7 +102,7 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           <CardContent className="space-y-4">
             <div className="flex justify-center">
               <div className={`h-20 w-20 rounded-full flex items-center justify-center ${userRank.badge}`}>
-                <Trophy className="h-10 w-10 text-white" />
+                <div className="text-3xl">🏆</div>
               </div>
             </div>
 
@@ -133,10 +133,17 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-              {quickLinks.map((link, index) => (
+              {[
+                { name: "Workouts", icon: "💪", href: "/dashboard" },
+                { name: "Skills", icon: "🏆", href: "/skills" },
+                { name: "Exercises", icon: "📚", href: "/exercises" },
+                { name: "Programs", icon: "📅", href: "/programs" },
+                { name: "Profile", icon: "👤", href: "/account/profile" },
+                { name: "Quiz", icon: "🎲", href: "/quiz" },
+              ].map((link, index) => (
                 <Link key={index} href={link.href}>
                   <div className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-muted transition-colors text-center">
-                    <div className="p-2 rounded-full bg-primary/10">{link.icon}</div>
+                    <div className="text-3xl mb-1">{link.icon}</div>
                     <span className="text-sm font-medium">{link.name}</span>
                   </div>
                 </Link>
@@ -156,22 +163,22 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <BarChart className="h-8 w-8 text-primary mb-2" />
+                <div className="text-4xl mb-2">💪</div>
                 <span className="text-2xl font-bold">0</span>
                 <span className="text-sm text-muted-foreground">Workouts</span>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <Trophy className="h-8 w-8 text-primary mb-2" />
+                <div className="text-4xl mb-2">🏆</div>
                 <span className="text-2xl font-bold">2</span>
                 <span className="text-sm text-muted-foreground">Achievements</span>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <Dumbbell className="h-8 w-8 text-primary mb-2" />
+                <div className="text-4xl mb-2">🏋️</div>
                 <span className="text-2xl font-bold">0</span>
                 <span className="text-sm text-muted-foreground">Exercises</span>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <Settings className="h-8 w-8 text-primary mb-2" />
+                <div className="text-4xl mb-2">⭐</div>
                 <span className="text-2xl font-bold">{userPoints}</span>
                 <span className="text-sm text-muted-foreground">Points</span>
               </div>

@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -92,13 +91,28 @@ export default function AchievementBadges() {
               <Tooltip key={index}>
                 <TooltipTrigger asChild>
                   <div className={`relative flex flex-col items-center ${!achievement.earned ? "opacity-40" : ""}`}>
-                    <div className="relative w-16 h-16 mb-1">
-                      <Image
-                        src={achievement.image || "/placeholder.svg"}
-                        alt={achievement.name}
-                        fill
-                        className="object-contain"
-                      />
+                    <div className="relative w-16 h-16 mb-1 bg-primary/10 rounded-full flex items-center justify-center">
+                      <div className="text-3xl">
+                        {achievement.name.includes("Pull-Up")
+                          ? "💪"
+                          : achievement.name.includes("Push-Up")
+                            ? "👐"
+                            : achievement.name.includes("Handstand")
+                              ? "🤸"
+                              : achievement.name.includes("Muscle-Up")
+                                ? "🔝"
+                                : achievement.name.includes("Front Lever")
+                                  ? "⬆️"
+                                  : achievement.name.includes("Pistol")
+                                    ? "🦵"
+                                    : achievement.name.includes("Planche")
+                                      ? "💯"
+                                      : achievement.name.includes("L-Sit")
+                                        ? "🪑"
+                                        : achievement.name.includes("Streak")
+                                          ? "🔥"
+                                          : "🏆"}
+                      </div>
                     </div>
                     <span className="text-xs text-center font-medium line-clamp-1">{achievement.name}</span>
                   </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Dumbbell, Trophy, Star, Award, LogOut } from "lucide-react"
+import { Dumbbell, Star, LogOut } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { motion } from "framer-motion"
@@ -150,9 +150,64 @@ export default function ProfilePage() {
                   <CardDescription>Your account details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Replace the avatar with an emoji */}
                   <div className="flex items-center justify-center mb-6">
                     <div className={`h-24 w-24 rounded-full ${userRank.badge} flex items-center justify-center`}>
-                      <span className="text-3xl font-bold text-white">{userName?.charAt(0).toUpperCase()}</span>
+                      <div className="text-4xl text-white">
+                        {userName?.charAt(0).toUpperCase() === "A"
+                          ? "😀"
+                          : userName?.charAt(0).toUpperCase() === "B"
+                            ? "😎"
+                            : userName?.charAt(0).toUpperCase() === "C"
+                              ? "😊"
+                              : userName?.charAt(0).toUpperCase() === "D"
+                                ? "😄"
+                                : userName?.charAt(0).toUpperCase() === "E"
+                                  ? "😁"
+                                  : userName?.charAt(0).toUpperCase() === "F"
+                                    ? "🤩"
+                                    : userName?.charAt(0).toUpperCase() === "G"
+                                      ? "😇"
+                                      : userName?.charAt(0).toUpperCase() === "H"
+                                        ? "🙂"
+                                        : userName?.charAt(0).toUpperCase() === "I"
+                                          ? "😉"
+                                          : userName?.charAt(0).toUpperCase() === "J"
+                                            ? "😍"
+                                            : userName?.charAt(0).toUpperCase() === "K"
+                                              ? "🤗"
+                                              : userName?.charAt(0).toUpperCase() === "L"
+                                                ? "😌"
+                                                : userName?.charAt(0).toUpperCase() === "M"
+                                                  ? "😏"
+                                                  : userName?.charAt(0).toUpperCase() === "N"
+                                                    ? "😃"
+                                                    : userName?.charAt(0).toUpperCase() === "O"
+                                                      ? "😀"
+                                                      : userName?.charAt(0).toUpperCase() === "P"
+                                                        ? "🙃"
+                                                        : userName?.charAt(0).toUpperCase() === "Q"
+                                                          ? "😋"
+                                                          : userName?.charAt(0).toUpperCase() === "R"
+                                                            ? "😊"
+                                                            : userName?.charAt(0).toUpperCase() === "S"
+                                                              ? "🤠"
+                                                              : userName?.charAt(0).toUpperCase() === "T"
+                                                                ? "😎"
+                                                                : userName?.charAt(0).toUpperCase() === "U"
+                                                                  ? "🤓"
+                                                                  : userName?.charAt(0).toUpperCase() === "V"
+                                                                    ? "😛"
+                                                                    : userName?.charAt(0).toUpperCase() === "W"
+                                                                      ? "😜"
+                                                                      : userName?.charAt(0).toUpperCase() === "X"
+                                                                        ? "🧐"
+                                                                        : userName?.charAt(0).toUpperCase() === "Y"
+                                                                          ? "🤪"
+                                                                          : userName?.charAt(0).toUpperCase() === "Z"
+                                                                            ? "😝"
+                                                                            : "👤"}
+                      </div>
                     </div>
                   </div>
 
@@ -196,8 +251,9 @@ export default function ProfilePage() {
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
+                      {/* Replace the trophy icon with emoji */}
                       <div className={`h-24 w-24 rounded-full flex items-center justify-center ${userRank.badge}`}>
-                        <Trophy className="h-12 w-12 text-white" />
+                        <div className="text-4xl text-white">🏆</div>
                       </div>
                       <div className="absolute -top-1 -right-1 bg-background rounded-full p-1">
                         <div className="bg-yellow-400 rounded-full p-1">
@@ -253,9 +309,10 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
+                    {/* Update the achievements section with emojis */}
                     <div className="flex items-start gap-3">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Award className="h-5 w-5 text-primary" />
+                        <div className="text-xl">🎉</div>
                       </div>
                       <div>
                         <h3 className="font-medium">Account Created</h3>
@@ -269,7 +326,7 @@ export default function ProfilePage() {
                       <div
                         className={`h-10 w-10 rounded-full ${userRank.badge} flex items-center justify-center flex-shrink-0`}
                       >
-                        <Trophy className="h-5 w-5 text-white" />
+                        <div className="text-xl text-white">🏆</div>
                       </div>
                       <div>
                         <h3 className="font-medium">Rank Assigned</h3>

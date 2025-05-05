@@ -253,7 +253,7 @@ export default function SkillsPage() {
                         <Link href={`/skills/${skill.slug}`}>
                           <Card className="h-full overflow-hidden">
                             <div
-                              className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-4xl`}
+                              className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-6xl`}
                             >
                               {skill.icon}
                             </div>
@@ -299,7 +299,7 @@ export default function SkillsPage() {
                           <Link href={`/skills/${skill.slug}`}>
                             <Card className="h-full overflow-hidden">
                               <div
-                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-4xl`}
+                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-6xl`}
                               >
                                 {skill.icon}
                               </div>
@@ -345,7 +345,7 @@ export default function SkillsPage() {
                           <Link href={`/skills/${skill.slug}`}>
                             <Card className="h-full overflow-hidden">
                               <div
-                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-4xl`}
+                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-6xl`}
                               >
                                 {skill.icon}
                               </div>
@@ -391,7 +391,7 @@ export default function SkillsPage() {
                           <Link href={`/skills/${skill.slug}`}>
                             <Card className="h-full overflow-hidden">
                               <div
-                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-4xl`}
+                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center text-6xl`}
                               >
                                 {skill.icon}
                               </div>

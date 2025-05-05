@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Dumbbell, Search, Filter } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -195,13 +194,21 @@ export default function ExercisesPage() {
                       .map((exercise, exerciseIndex) => (
                         <Card key={exerciseIndex} className="overflow-hidden">
                           <div className="aspect-video w-full overflow-hidden">
-                            <Image
-                              src={exercise.image || "/placeholder.svg"}
-                              alt={exercise.name}
-                              width={300}
-                              height={200}
-                              className="object-cover w-full h-full"
-                            />
+                            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-6xl">
+                              {exercise.category === "Push"
+                                ? "💪"
+                                : exercise.category === "Pull"
+                                  ? "🏋️"
+                                  : exercise.category === "Legs"
+                                    ? "🦵"
+                                    : exercise.category === "Core"
+                                      ? "🔄"
+                                      : exercise.category === "Cardio"
+                                        ? "❤️"
+                                        : exercise.category === "Mobility"
+                                          ? "🤸"
+                                          : "🏆"}
+                            </div>
                           </div>
                           <CardHeader className="p-4">
                             <CardTitle>{exercise.name}</CardTitle>

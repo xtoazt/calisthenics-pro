@@ -85,7 +85,12 @@ export default function WorkoutTimer() {
           animate={{ scale: isRunning ? [1, 1.02, 1] : 1 }}
           transition={{ duration: 1, repeat: isRunning ? Number.POSITIVE_INFINITY : 0, ease: "easeInOut" }}
         >
-          <span className={`text-3xl font-bold font-mono ${getTimeColor()}`}>{formatTime(time)}</span>
+          <div className="flex flex-col items-center">
+            <span className={`text-3xl font-bold font-mono ${getTimeColor()}`}>{formatTime(time)}</span>
+            <div className="text-2xl mt-2">
+              {time < 60000 ? "⏱️" : time < 180000 ? "⌛" : time < 300000 ? "🔥" : "💪"}
+            </div>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-3 gap-4 w-full max-w-xs">

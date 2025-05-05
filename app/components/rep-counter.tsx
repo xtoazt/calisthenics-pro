@@ -65,7 +65,12 @@ export default function RepCounter() {
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          <span className={`text-5xl font-bold ${getCountColor()}`}>{count}</span>
+          <div className="flex flex-col items-center">
+            <span className={`text-5xl font-bold ${getCountColor()}`}>{count}</span>
+            <div className="text-2xl mt-1">
+              {count < 5 ? "😌" : count < 10 ? "😊" : count < 15 ? "😃" : count < 20 ? "😁" : "🤩"}
+            </div>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-3 gap-4 w-full max-w-xs">

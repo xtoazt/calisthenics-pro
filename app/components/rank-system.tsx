@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Trophy, Star, Info } from "lucide-react"
+import { Info } from "lucide-react"
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -108,11 +108,11 @@ export default function RankSystem({
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <div className={`h-24 w-24 rounded-full flex items-center justify-center ${currentRankData.badge}`}>
-              <Trophy className="h-12 w-12 text-white" />
+              <div className="text-4xl text-white">🏆</div>
             </div>
             <div className="absolute -top-1 -right-1 bg-background rounded-full p-1">
               <div className="bg-yellow-400 rounded-full p-1">
-                <Star className="h-4 w-4 text-white" />
+                <div className="text-sm">⭐</div>
               </div>
             </div>
           </motion.div>

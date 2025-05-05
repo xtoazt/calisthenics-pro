@@ -84,12 +84,21 @@ export default function ProgressGallery() {
               </div>
 
               <div className="relative aspect-[3/4] overflow-hidden rounded-md">
-                <Image
-                  src={progressImages[currentImageIndex].image || "/placeholder.svg"}
-                  alt={`Progress photo from ${progressImages[currentImageIndex].date}`}
-                  fill
-                  className="object-cover"
-                />
+                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                  <div className="text-6xl">
+                    {progressImages[currentImageIndex].date.includes("January")
+                      ? "🌱"
+                      : progressImages[currentImageIndex].date.includes("March")
+                        ? "🌿"
+                        : progressImages[currentImageIndex].date.includes("June")
+                          ? "🌳"
+                          : progressImages[currentImageIndex].date.includes("September")
+                            ? "🍂"
+                            : progressImages[currentImageIndex].date.includes("December")
+                              ? "❄️"
+                              : "🌞"}
+                  </div>
+                </div>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="secondary" size="icon" className="absolute bottom-2 right-2">
@@ -124,12 +133,21 @@ export default function ProgressGallery() {
                 <Dialog key={index}>
                   <DialogTrigger asChild>
                     <div className="relative aspect-square overflow-hidden rounded-md cursor-pointer hover:opacity-90 transition-opacity">
-                      <Image
-                        src={item.image || "/placeholder.svg"}
-                        alt={`Progress photo from ${item.date}`}
-                        fill
-                        className="object-cover"
-                      />
+                      <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                        <div className="text-4xl">
+                          {item.date.includes("January")
+                            ? "🌱"
+                            : item.date.includes("March")
+                              ? "🌿"
+                              : item.date.includes("June")
+                                ? "🌳"
+                                : item.date.includes("September")
+                                  ? "🍂"
+                                  : item.date.includes("December")
+                                    ? "❄️"
+                                    : "🌞"}
+                        </div>
+                      </div>
                       <div className="absolute inset-0 bg-black/30 flex items-end p-2">
                         <span className="text-white text-xs font-medium">{item.date}</span>
                       </div>

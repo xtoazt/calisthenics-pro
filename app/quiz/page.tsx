@@ -108,11 +108,19 @@ export default function QuizPage() {
                     <CardDescription>You've already completed the onboarding quiz</CardDescription>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center justify-center py-8">
-                    <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-                    <p className="text-center mb-4">
-                      You've already completed the quiz and your preferences are saved. Your dashboard has been
-                      personalized based on your responses.
-                    </p>
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      className="flex flex-col items-center justify-center py-8"
+                    >
+                      <div className="text-6xl mb-4">🎉</div>
+                      <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+                      <p className="text-center mb-4">
+                        You've already completed the quiz and your preferences are saved. Your dashboard has been
+                        personalized based on your responses.
+                      </p>
+                    </motion.div>
                   </CardContent>
                   <CardFooter className="flex justify-center">
                     <Button onClick={() => router.push("/dashboard")}>Go to Dashboard</Button>
@@ -171,6 +179,10 @@ export default function QuizPage() {
                 <CardContent className="space-y-4">
                   {step === 1 && (
                     <div className="space-y-2">
+                      <div className="text-center mb-4">
+                        <div className="text-5xl mb-2">👋</div>
+                        <p>Let's get to know you better</p>
+                      </div>
                       <Label htmlFor="name">Your Name</Label>
                       <Input
                         id="name"
@@ -182,58 +194,76 @@ export default function QuizPage() {
                   )}
 
                   {step === 2 && (
-                    <RadioGroup value={experience} onValueChange={setExperience}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="beginner" id="beginner" />
-                        <Label htmlFor="beginner">Beginner - New to fitness</Label>
+                    <>
+                      <div className="text-center mb-4">
+                        <div className="text-5xl mb-2">💪</div>
+                        <p>Tell us about your fitness level</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="intermediate" id="intermediate" />
-                        <Label htmlFor="intermediate">Intermediate - Some experience</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="advanced" id="advanced" />
-                        <Label htmlFor="advanced">Advanced - Experienced athlete</Label>
-                      </div>
-                    </RadioGroup>
+                      <RadioGroup value={experience} onValueChange={setExperience}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="beginner" id="beginner" />
+                          <Label htmlFor="beginner">Beginner - New to fitness</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="intermediate" id="intermediate" />
+                          <Label htmlFor="intermediate">Intermediate - Some experience</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="advanced" id="advanced" />
+                          <Label htmlFor="advanced">Advanced - Experienced athlete</Label>
+                        </div>
+                      </RadioGroup>
+                    </>
                   )}
 
                   {step === 3 && (
-                    <RadioGroup value={goal} onValueChange={setGoal}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="strength" id="strength" />
-                        <Label htmlFor="strength">Build strength</Label>
+                    <>
+                      <div className="text-center mb-4">
+                        <div className="text-5xl mb-2">🎯</div>
+                        <p>What are your fitness goals?</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="skills" id="skills" />
-                        <Label htmlFor="skills">Learn skills (muscle-ups, handstands, etc.)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="endurance" id="endurance" />
-                        <Label htmlFor="endurance">Improve endurance</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="all" id="all" />
-                        <Label htmlFor="all">All of the above</Label>
-                      </div>
-                    </RadioGroup>
+                      <RadioGroup value={goal} onValueChange={setGoal}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="strength" id="strength" />
+                          <Label htmlFor="strength">Build strength</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="skills" id="skills" />
+                          <Label htmlFor="skills">Learn skills (muscle-ups, handstands, etc.)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="endurance" id="endurance" />
+                          <Label htmlFor="endurance">Improve endurance</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="all" id="all" />
+                          <Label htmlFor="all">All of the above</Label>
+                        </div>
+                      </RadioGroup>
+                    </>
                   )}
 
                   {step === 4 && (
-                    <RadioGroup value={equipment} onValueChange={setEquipment}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="none" id="none" />
-                        <Label htmlFor="none">No equipment (bodyweight only)</Label>
+                    <>
+                      <div className="text-center mb-4">
+                        <div className="text-5xl mb-2">🏋️</div>
+                        <p>What equipment do you have access to?</p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="minimal" id="minimal" />
-                        <Label htmlFor="minimal">Minimal (pull-up bar, rings)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="full" id="full" />
-                        <Label htmlFor="full">Full home gym</Label>
-                      </div>
-                    </RadioGroup>
+                      <RadioGroup value={equipment} onValueChange={setEquipment}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="none" id="none" />
+                          <Label htmlFor="none">No equipment (bodyweight only)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="minimal" id="minimal" />
+                          <Label htmlFor="minimal">Minimal (pull-up bar, rings)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="full" id="full" />
+                          <Label htmlFor="full">Full home gym</Label>
+                        </div>
+                      </RadioGroup>
+                    </>
                   )}
                 </CardContent>
                 <CardFooter className="flex justify-between">

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Medal, Share2 } from "lucide-react"
+import { Share2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { calculateUserPoints, getUserRank, getNextRank, calculateProgressToNextRank } from "@/lib/user-utils"
 import { toast } from "@/components/ui/use-toast"
@@ -142,7 +142,7 @@ export default function Leaderboard() {
                   <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-6 font-medium">{entry.position}.</div>
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                      <Medal className="h-4 w-4 text-primary" />
+                      <div className="text-xl">🏅</div>
                     </div>
                     <div>
                       <p className="font-medium">

@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Dumbbell, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -288,13 +287,37 @@ export default function SkillsOverviewPage() {
                     {category.skills.map((skill, index) => (
                       <Card key={index} className="overflow-hidden">
                         <div className="aspect-video overflow-hidden">
-                          <Image
-                            src={skill.image || "/placeholder.svg"}
-                            alt={skill.name}
-                            width={300}
-                            height={200}
-                            className="object-cover w-full h-full transition-transform hover:scale-105"
-                          />
+                          <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-6xl">
+                            {skill.name.includes("Push-Up")
+                              ? "💪"
+                              : skill.name.includes("Pull-Up")
+                                ? "🏋️"
+                                : skill.name.includes("Squat")
+                                  ? "🦵"
+                                  : skill.name.includes("Plank")
+                                    ? "🧘"
+                                    : skill.name.includes("Dips")
+                                      ? "🔄"
+                                      : skill.name.includes("Row")
+                                        ? "🚣"
+                                        : skill.name.includes("Handstand")
+                                          ? "🤸"
+                                          : skill.name.includes("Planche")
+                                            ? "💯"
+                                            : skill.name.includes("Lever")
+                                              ? "⬆️"
+                                              : skill.name.includes("Muscle-Up")
+                                                ? "🔝"
+                                                : skill.name.includes("Flag")
+                                                  ? "🚩"
+                                                  : skill.name.includes("L-Sit")
+                                                    ? "🪑"
+                                                    : skill.name.includes("Dragon")
+                                                      ? "🐉"
+                                                      : skill.name.includes("Wheel")
+                                                        ? "🔄"
+                                                        : "🏆"}
+                          </div>
                         </div>
                         <CardHeader>
                           <CardTitle>{skill.name}</CardTitle>

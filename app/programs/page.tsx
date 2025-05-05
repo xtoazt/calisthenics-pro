@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Dumbbell, ArrowRight } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -112,13 +111,21 @@ export default function ProgramsPage() {
               {programs.map((program, index) => (
                 <Card key={index} className="overflow-hidden">
                   <div className="aspect-video w-full overflow-hidden">
-                    <Image
-                      src={program.image || "/placeholder.svg"}
-                      alt={program.title}
-                      width={400}
-                      height={250}
-                      className="object-cover w-full h-full transition-transform hover:scale-105"
-                    />
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-6xl">
+                      {program.title.includes("Beginner")
+                        ? "🔰"
+                        : program.title.includes("Intermediate")
+                          ? "🏋️"
+                          : program.title.includes("Advanced")
+                            ? "🏆"
+                            : program.title.includes("Hypertrophy")
+                              ? "💪"
+                              : program.title.includes("Fat Loss")
+                                ? "🔥"
+                                : program.title.includes("Mobility")
+                                  ? "🤸"
+                                  : "📊"}
+                    </div>
                   </div>
                   <CardHeader>
                     <CardTitle>{program.title}</CardTitle>

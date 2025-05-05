@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dumbbell, ChevronLeft, LogOut, CheckCircle2 } from "lucide-react"
+import { Dumbbell, ChevronLeft, LogOut } from "lucide-react"
 import { motion } from "framer-motion"
 
 export default function SkillDetailPage() {
@@ -134,7 +134,7 @@ export default function SkillDetailPage() {
               <div
                 className={`w-full h-48 rounded-lg bg-gradient-to-br ${skill.levels[0].color} flex items-center justify-center mb-8`}
               >
-                <span className="text-6xl">{skill.icon}</span>
+                <span className="text-8xl">{skill.icon}</span>
               </div>
 
               <Tabs defaultValue="progression" className="w-full">
@@ -169,7 +169,7 @@ export default function SkillDetailPage() {
                             <ul className="space-y-2">
                               {level.steps.map((step: string, stepIndex: number) => (
                                 <li key={stepIndex} className="flex items-start gap-2">
-                                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                  <div className="text-primary flex-shrink-0 mt-0.5">✅</div>
                                   <span>{step}</span>
                                 </li>
                               ))}

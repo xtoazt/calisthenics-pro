@@ -265,7 +265,7 @@ export default function DashboardPage() {
                         >
                           <Card className="overflow-hidden">
                             <div
-                              className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${workout.color} flex items-center justify-center text-4xl`}
+                              className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${workout.color} flex items-center justify-center text-6xl`}
                             >
                               {workout.icon}
                             </div>

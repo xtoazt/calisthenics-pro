@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { Apple, Beef, Fish, Egg, Carrot, Wheat } from "lucide-react"
 
 export default function NutritionGuide() {
   const dailyNutrition = {
@@ -164,37 +163,37 @@ export default function NutritionGuide() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <Beef className="h-5 w-5 text-primary" />
+                    <div className="text-xl">🥩</div>
                   </div>
                   <span className="text-xs">Lean Protein</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <Carrot className="h-5 w-5 text-primary" />
+                    <div className="text-xl">🥦</div>
                   </div>
                   <span className="text-xs">Vegetables</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <Apple className="h-5 w-5 text-primary" />
+                    <div className="text-xl">🍎</div>
                   </div>
                   <span className="text-xs">Fruits</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <Wheat className="h-5 w-5 text-primary" />
+                    <div className="text-xl">🌾</div>
                   </div>
                   <span className="text-xs">Whole Grains</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <Egg className="h-5 w-5 text-primary" />
+                    <div className="text-xl">🥑</div>
                   </div>
                   <span className="text-xs">Healthy Fats</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <Fish className="h-5 w-5 text-primary" />
+                    <div className="text-xl">🐟</div>
                   </div>
                   <span className="text-xs">Omega-3s</span>
                 </div>

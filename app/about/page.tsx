@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Dumbbell, Mail, Github, Linkedin } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -95,13 +94,9 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="mx-auto w-full max-w-[500px] overflow-hidden rounded-xl">
-                <Image
-                  src={getPlaceholderImage(800, 600, "Team") || "/placeholder.svg"}
-                  alt="The CalisthenicsPro team"
-                  width={800}
-                  height={600}
-                  className="object-cover w-full h-full"
-                />
+                <div className="aspect-video w-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-6xl">
+                  👥
+                </div>
               </div>
             </div>
           </div>
@@ -121,13 +116,15 @@ export default function AboutPage() {
               {teamMembers.map((member, index) => (
                 <Card key={index} className="overflow-hidden">
                   <div className="aspect-square overflow-hidden">
-                    <Image
-                      src={member.image || "/placeholder.svg"}
-                      alt={member.name}
-                      width={300}
-                      height={300}
-                      className="object-cover w-full h-full"
-                    />
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-6xl">
+                      {member.name.includes("Rohan")
+                        ? "👨‍💻"
+                        : member.name.includes("Sarah")
+                          ? "👩‍⚕️"
+                          : member.name.includes("Michael")
+                            ? "👨‍🔬"
+                            : "👤"}
+                    </div>
                   </div>
                   <CardHeader>
                     <CardTitle>{member.name}</CardTitle>
@@ -186,13 +183,9 @@ export default function AboutPage() {
                 </ul>
               </div>
               <div className="mx-auto w-full max-w-[500px] overflow-hidden rounded-xl">
-                <Image
-                  src={getPlaceholderImage(800, 600, "Philosophy") || "/placeholder.svg"}
-                  alt="Calisthenics training philosophy"
-                  width={800}
-                  height={600}
-                  className="object-cover w-full h-full"
-                />
+                <div className="aspect-video w-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-6xl">
+                  🧠
+                </div>
               </div>
             </div>
           </div>

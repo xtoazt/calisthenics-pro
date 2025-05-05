@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Heart, MessageSquare, Share2, Send } from "lucide-react"
 
@@ -99,7 +98,9 @@ export default function CommunityFeed() {
       <CardHeader className="pb-3">
         <div className="flex space-x-4">
           <Avatar>
-            <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Your avatar" />
+            <div className="w-full h-full bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="text-sm">👤</div>
+            </div>
             <AvatarFallback>YO</AvatarFallback>
           </Avatar>
           <div className="flex-1">
@@ -122,7 +123,17 @@ export default function CommunityFeed() {
           <div key={post.id} className="border rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={post.user.avatar || "/placeholder.svg"} alt={post.user.name} />
+                <div className="w-full h-full bg-primary/10 rounded-full flex items-center justify-center">
+                  <div className="text-sm">
+                    {post.user.name.charAt(0) === "A"
+                      ? "😀"
+                      : post.user.name.charAt(0) === "S"
+                        ? "😊"
+                        : post.user.name.charAt(0) === "M"
+                          ? "😎"
+                          : "👤"}
+                  </div>
+                </div>
                 <AvatarFallback>{post.user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
@@ -135,7 +146,17 @@ export default function CommunityFeed() {
             <p className="text-sm mb-3">{post.content}</p>
             {post.image && (
               <div className="relative aspect-video mb-3 overflow-hidden rounded-md">
-                <Image src={post.image || "/placeholder.svg"} alt="Post image" fill className="object-cover" />
+                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+                  <div className="text-6xl">
+                    {post.content.includes("muscle-up")
+                      ? "🔝"
+                      : post.content.includes("handstand")
+                        ? "🤸"
+                        : post.content.includes("lever")
+                          ? "⬆️"
+                          : "💪"}
+                  </div>
+                </div>
               </div>
             )}
             <div className="flex items-center space-x-4 text-sm">
