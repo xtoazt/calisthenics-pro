@@ -24,6 +24,6 @@
 Visit the platform to begin training instantly:  
 **[https://calisthenicspro.vercel.app]**
 
-No registration. No paywalls. Just training.
+No registration. No paywalls. Just training. 
 
 
