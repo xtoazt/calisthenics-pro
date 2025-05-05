@@ -1,12 +1,24 @@
 "use client"
 
 import { Progress } from "@/components/ui/progress"
-
-import { useState, useEffect } from "react"
+import Image from "next/image"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Dumbbell, Settings, LogOut, BarChart3, Timer, Hash, Trophy } from "lucide-react"
+import {
+  Dumbbell,
+  Settings,
+  LogOut,
+  BarChart3,
+  Timer,
+  Hash,
+  Trophy,
+  ChevronRight,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import WorkoutTimer from "../components/workout-timer"
@@ -21,7 +33,26 @@ import {
   calculateProgressToNextRank,
   getPersonalizedWorkouts,
   getWelcomeMessage,
+  getRecommendedSkills,
 } from "@/lib/user-utils"
+import {
+  saveCompletedWorkout,
+  getCompletedWorkouts,
+  getTotalPoints,
+  getCompletedWorkoutCount,
+  getCompletedSkillCount,
+  getTotalExerciseCount,
+  initializeUserData,
+} from "@/lib/workout-utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -31,59 +62,200 @@ export default function DashboardPage() {
   const [userEquipment, setUserEquipment] = useState<string | null>(null)
   const [userPoints, setUserPoints] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("workouts")
+  const [recommendedSkills, setRecommendedSkills] = useState<any[]>([])
+  const [completedWorkouts, setCompletedWorkouts] = useState<any[]>([])
+  const [selectedWorkout, setSelectedWorkout] = useState<any>(null)
+  const [workoutDialogOpen, setWorkoutDialogOpen] = useState(false)
+  const [workoutDuration, setWorkoutDuration] = useState(0)
+  const [workoutCompleted, setWorkoutCompleted] = useState(false)
+  const [earnedPoints, setEarnedPoints] = useState(0)
+  const [stats, setStats] = useState({
+    workouts: 0,
+    achievements: 0,
+    exercises: 0,
+    skills: 0,
+  })
+
+  // Load user data
+  const loadUserData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Check for user in localStorage
+      const user = localStorage.getItem("user")
+      const quizCompleted = localStorage.getItem("quizCompleted")
+
+      if (!user) {
+        router.push("/account")
+        return
+      }
+
+      if (!quizCompleted) {
+        router.push("/quiz")
+        return
+      }
+
+      // Initialize user data if needed
+      initializeUserData()
+
+      const experience = localStorage.getItem("userExperience")
+      const goal = localStorage.getItem("userGoal")
+      const equipment = localStorage.getItem("userEquipment")
+
+      setUserName(user)
+      setUserExperience(experience)
+      setUserGoal(goal)
+      setUserEquipment(equipment)
+
+      // Get completed workouts
+      const completed = getCompletedWorkouts()
+      setCompletedWorkouts(completed)
+
+      // Get total points (either from localStorage or calculate)
+      const storedPoints = getTotalPoints()
+      if (storedPoints > 0) {
+        setUserPoints(storedPoints)
+      } else {
+        // Calculate user points based on name and experience
+        const calculatedPoints = calculateUserPoints(user, experience)
+        setUserPoints(calculatedPoints)
+      }
+
+      // Get recommended skills based on user preferences
+      const skills = getRecommendedSkills(experience, goal)
+      setRecommendedSkills(skills)
+
+      // Get stats
+      setStats({
+        workouts: getCompletedWorkoutCount(),
+        achievements: Math.min(getCompletedWorkoutCount() + getCompletedSkillCount(), 10), // Cap at 10 for now
+        exercises: getTotalExerciseCount(),
+        skills: getCompletedSkillCount(),
+      })
+
+      setLoading(false)
+    } catch (err) {
+      console.error("Error loading user data:", err)
+      setError("Failed to load user data. Please try refreshing the page.")
+      setLoading(false)
+    }
+  }, [router])
 
   // Check if user is logged in and has completed the quiz
   useEffect(() => {
-    // Check for user in localStorage
-    const user = localStorage.getItem("user")
-    const quizCompleted = localStorage.getItem("quizCompleted")
-
-    if (!user) {
-      router.push("/account")
-      return
-    }
-
-    if (!quizCompleted) {
-      router.push("/quiz")
-      return
-    }
-
-    const experience = localStorage.getItem("userExperience")
-    const goal = localStorage.getItem("userGoal")
-    const equipment = localStorage.getItem("userEquipment")
-
-    setUserName(user)
-    setUserExperience(experience)
-    setUserGoal(goal)
-    setUserEquipment(equipment)
-
-    // Calculate user points based on name and experience
-    const points = calculateUserPoints(user, experience)
-    setUserPoints(points)
-
-    setLoading(false)
-  }, [router])
+    loadUserData()
+  }, [loadUserData])
 
   const handleLogout = () => {
-    localStorage.removeItem("user")
-    localStorage.removeItem("quizCompleted")
-    localStorage.removeItem("userExperience")
-    localStorage.removeItem("userGoal")
-    localStorage.removeItem("userEquipment")
+    try {
+      localStorage.removeItem("user")
+      localStorage.removeItem("quizCompleted")
+      localStorage.removeItem("userExperience")
+      localStorage.removeItem("userGoal")
+      localStorage.removeItem("userEquipment")
 
-    // Also clear cookies
-    document.cookie = "user=; path=/; max-age=0"
-    document.cookie = "quizCompleted=; path=/; max-age=0"
-    document.cookie = "userExperience=; path=/; max-age=0"
-    document.cookie = "userGoal=; path=/; max-age=0"
-    document.cookie = "userEquipment=; path=/; max-age=0"
+      // Also clear cookies
+      document.cookie = "user=; path=/; max-age=0"
+      document.cookie = "quizCompleted=; path=/; max-age=0"
+      document.cookie = "userExperience=; path=/; max-age=0"
+      document.cookie = "userGoal=; path=/; max-age=0"
+      document.cookie = "userEquipment=; path=/; max-age=0"
 
-    toast({
-      title: "Signed out successfully",
-      description: "You have been signed out of your account",
-    })
-    router.push("/")
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account",
+      })
+      router.push("/")
+    } catch (err) {
+      console.error("Error during logout:", err)
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing you out. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleStartWorkout = (workout: any) => {
+    setSelectedWorkout(workout)
+    setWorkoutDialogOpen(true)
+    setWorkoutDuration(0)
+    setWorkoutCompleted(false)
+    setEarnedPoints(0)
+  }
+
+  const handleCompleteWorkout = () => {
+    try {
+      if (!selectedWorkout) {
+        toast({
+          title: "Error",
+          description: "No workout selected",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Generate a unique ID for the workout
+      const workoutId = `workout-${Date.now()}`
+
+      // Save the completed workout
+      const completedWorkout = saveCompletedWorkout(
+        workoutId,
+        selectedWorkout.title,
+        workoutDuration > 0 ? workoutDuration : Math.floor(Math.random() * 1200) + 600, // Random duration between 10-30 minutes if not set
+      )
+
+      if (!completedWorkout) {
+        toast({
+          title: "Error",
+          description: "Failed to save workout",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Update state
+      setCompletedWorkouts([...completedWorkouts, completedWorkout])
+      setUserPoints(getTotalPoints())
+      setEarnedPoints(completedWorkout.points)
+      setWorkoutCompleted(true)
+
+      // Update stats
+      setStats((prev) => ({
+        ...prev,
+        workouts: prev.workouts + 1,
+        exercises: prev.exercises + 5, // Assume 5 exercises per workout
+        achievements: Math.min(prev.achievements + 1, 10), // Cap at 10
+      }))
+
+      toast({
+        title: "Workout completed!",
+        description: `You earned ${completedWorkout.points} points!`,
+      })
+    } catch (err) {
+      console.error("Error completing workout:", err)
+      toast({
+        title: "Error",
+        description: "There was a problem completing your workout. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleTimeUpdate = (time: number) => {
+    setWorkoutDuration(time)
+  }
+
+  const handleSaveTime = (time: number) => {
+    if (time > 0) {
+      toast({
+        title: "Time saved",
+        description: `Workout time saved: ${Math.floor(time / 60)} minutes and ${time % 60} seconds`,
+      })
+    }
   }
 
   const fadeIn = {
@@ -96,7 +268,24 @@ export default function DashboardPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-2">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p>Loading...</p>
+          <p>Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-full max-w-md p-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+          <Button className="mt-4 w-full" onClick={loadUserData}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Try Again
+          </Button>
         </div>
       </div>
     )
@@ -185,7 +374,7 @@ export default function DashboardPage() {
                     <li>Choose a workout from the selection below</li>
                     <li>Use the timer to track your workout duration</li>
                     <li>Count your reps with the rep counter tool</li>
-                    <li>Come back regularly to maintain your progress</li>
+                    <li>Mark workouts as complete to earn points and rank up</li>
                   </ol>
                 </CardContent>
               </Card>
@@ -231,6 +420,40 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
 
+            {/* Today's Stats */}
+            <motion.div variants={fadeIn} className="col-span-full">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Today's Stats</CardTitle>
+                  <CardDescription>Your progress at a glance</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
+                      <Dumbbell className="h-8 w-8 text-primary mb-2" />
+                      <span className="text-2xl font-bold">{stats.workouts}</span>
+                      <span className="text-sm text-muted-foreground">Workouts</span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
+                      <Trophy className="h-8 w-8 text-primary mb-2" />
+                      <span className="text-2xl font-bold">{stats.achievements}</span>
+                      <span className="text-sm text-muted-foreground">Achievements</span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
+                      <Dumbbell className="h-8 w-8 text-primary mb-2" />
+                      <span className="text-2xl font-bold">{stats.exercises}</span>
+                      <span className="text-sm text-muted-foreground">Exercises</span>
+                    </div>
+                    <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
+                      <Settings className="h-8 w-8 text-primary mb-2" />
+                      <span className="text-2xl font-bold">{userPoints}</span>
+                      <span className="text-sm text-muted-foreground">Points</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
             <motion.div variants={fadeIn} className="col-span-full">
               <Tabs defaultValue="workouts" className="w-full" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid grid-cols-4 w-full">
@@ -257,35 +480,61 @@ export default function DashboardPage() {
                 >
                   <TabsContent value="workouts" className="mt-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {workouts.map((workout, index) => (
-                        <motion.div
-                          key={index}
-                          whileHover={{ scale: 1.03, y: -5 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        >
-                          <Card className="overflow-hidden">
-                            <div
-                              className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${workout.color} flex items-center justify-center text-6xl`}
-                            >
-                              {workout.icon}
-                            </div>
-                            <CardHeader className="p-4">
-                              <CardTitle className="text-lg">{workout.title}</CardTitle>
-                              <CardDescription>{workout.description}</CardDescription>
-                            </CardHeader>
-                            <CardFooter className="p-4 pt-0 flex justify-between">
-                              <div className="text-sm">{workout.duration}</div>
-                              <Button size="sm">Start</Button>
-                            </CardFooter>
-                          </Card>
-                        </motion.div>
-                      ))}
+                      {workouts.map((workout, index) => {
+                        // Check if this workout is completed
+                        const isCompleted = completedWorkouts.some((completed) => completed.title === workout.title)
+
+                        return (
+                          <motion.div
+                            key={index}
+                            whileHover={{ scale: 1.03, y: -5 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                          >
+                            <Card className={`overflow-hidden ${isCompleted ? "border-green-500" : ""}`}>
+                              <div
+                                className={`aspect-video w-full overflow-hidden bg-gradient-to-br ${workout.color} flex items-center justify-center relative`}
+                              >
+                                {isCompleted && (
+                                  <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
+                                    <CheckCircle className="h-5 w-5" />
+                                  </div>
+                                )}
+                                {workout.image ? (
+                                  <Image
+                                    src={workout.image || "/placeholder.svg"}
+                                    alt={workout.title}
+                                    width={400}
+                                    height={300}
+                                    className="object-cover w-full h-full"
+                                  />
+                                ) : (
+                                  <div className="text-4xl">{workout.icon}</div>
+                                )}
+                              </div>
+                              <CardHeader className="p-4">
+                                <CardTitle className="text-lg">{workout.title}</CardTitle>
+                                <CardDescription>{workout.description}</CardDescription>
+                              </CardHeader>
+                              <CardFooter className="p-4 pt-0 flex justify-between">
+                                <div className="text-sm">{workout.duration}</div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleStartWorkout(workout)}
+                                  variant={isCompleted ? "outline" : "default"}
+                                >
+                                  {isCompleted ? "Do Again" : "Start"}
+                                </Button>
+                              </CardFooter>
+                            </Card>
+                          </motion.div>
+                        )
+                      })}
                     </div>
                   </TabsContent>
 
                   <TabsContent value="timer" className="mt-6">
                     <div className="max-w-md mx-auto">
-                      <WorkoutTimer />
+                      <WorkoutTimer onTimeUpdate={handleTimeUpdate} onSave={handleSaveTime} />
                     </div>
                   </TabsContent>
 
@@ -303,6 +552,79 @@ export default function DashboardPage() {
                 </motion.div>
               </Tabs>
             </motion.div>
+
+            {/* Completed Workouts Section */}
+            {completedWorkouts.length > 0 && (
+              <motion.div variants={fadeIn} className="col-span-full">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Your Completed Workouts</CardTitle>
+                    <CardDescription>
+                      You've completed {completedWorkouts.length} workout{completedWorkouts.length !== 1 ? "s" : ""}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {completedWorkouts.slice(0, 5).map((workout, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{workout.title}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(workout.completedAt).toLocaleDateString()} • {Math.floor(workout.duration / 60)}{" "}
+                              minutes
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-green-600">+{workout.points} pts</span>
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  {completedWorkouts.length > 5 && (
+                    <CardFooter>
+                      <Button variant="outline" className="w-full">
+                        View All Completed Workouts
+                      </Button>
+                    </CardFooter>
+                  )}
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Recommended Skills Section - Based on Quiz Answers */}
+            {recommendedSkills.length > 0 && (
+              <motion.div variants={fadeIn} className="col-span-full">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recommended Skills Based on Your Goals</CardTitle>
+                    <CardDescription>
+                      These skills are tailored to your {userExperience} experience level and {userGoal} goals
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      {recommendedSkills.map((skill, index) => (
+                        <Link key={index} href={`/skills/${skill.slug}`}>
+                          <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                            <CardHeader className="p-4">
+                              <CardTitle className="text-base">{skill.name}</CardTitle>
+                              <CardDescription className="text-xs">{skill.description}</CardDescription>
+                            </CardHeader>
+                            <CardFooter className="p-4 pt-0">
+                              <Button variant="ghost" size="sm" className="w-full justify-between">
+                                View Skill <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </main>
@@ -322,6 +644,53 @@ export default function DashboardPage() {
           </p>
         </div>
       </footer>
+
+      {/* Workout Dialog */}
+      <Dialog open={workoutDialogOpen} onOpenChange={setWorkoutDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selectedWorkout?.title}</DialogTitle>
+            <DialogDescription>
+              {workoutCompleted ? "Great job completing your workout!" : selectedWorkout?.description}
+            </DialogDescription>
+          </DialogHeader>
+
+          {workoutCompleted ? (
+            <div className="flex flex-col items-center justify-center py-6 space-y-4">
+              <div className="h-24 w-24 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="h-12 w-12 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold">Workout Complete!</h3>
+              <p className="text-center text-muted-foreground">
+                You've earned {earnedPoints} points for completing this workout.
+              </p>
+              <div className="flex items-center justify-center gap-2 bg-green-100 px-4 py-2 rounded-full">
+                <Trophy className="h-5 w-5 text-green-600" />
+                <span className="font-semibold text-green-600">+{earnedPoints} points</span>
+              </div>
+            </div>
+          ) : (
+            <div className="py-4">
+              <p className="mb-4">Ready to start your workout?</p>
+              <p className="text-sm text-muted-foreground">
+                Click "Complete Workout" when you're done to earn points and track your progress.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-between">
+            <Button type="button" variant="outline" onClick={() => setWorkoutDialogOpen(false)}>
+              {workoutCompleted ? "Close" : "Cancel"}
+            </Button>
+
+            {!workoutCompleted && (
+              <Button type="button" onClick={handleCompleteWorkout}>
+                Complete Workout
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Dumbbell } from "lucide-react"
@@ -15,7 +15,21 @@ import { toast } from "@/components/ui/use-toast"
 export default function AccountPage() {
   const [name, setName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
   const router = useRouter()
+
+  // Check for redirect URL in cookies
+  useEffect(() => {
+    // Parse cookies to find redirectUrl
+    const cookies = document.cookie.split(";")
+    const redirectCookie = cookies.find((cookie) => cookie.trim().startsWith("redirectUrl="))
+    if (redirectCookie) {
+      const redirectValue = redirectCookie.split("=")[1]
+      if (redirectValue && redirectValue !== "/account") {
+        setRedirectUrl(redirectValue)
+      }
+    }
+  }, [])
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,13 +58,19 @@ export default function AccountPage() {
       description: `Welcome, ${name}!`,
     })
 
-    // Redirect to quiz if not completed, otherwise dashboard
+    // Redirect to quiz if not completed, otherwise dashboard or the original URL
     const quizCompleted = localStorage.getItem("quizCompleted")
 
     setTimeout(() => {
       setIsLoading(false)
       if (quizCompleted) {
-        router.push("/dashboard")
+        if (redirectUrl) {
+          // Clear the redirect cookie
+          document.cookie = "redirectUrl=; path=/; max-age=0"
+          router.push(redirectUrl)
+        } else {
+          router.push("/dashboard")
+        }
       } else {
         router.push("/quiz")
       }

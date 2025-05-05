@@ -4,13 +4,24 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dumbbell, Trophy, BookOpen, Dices, Calendar, User } from "lucide-react"
+import { Dumbbell, Clock, Trophy, BookOpen, Dices, Calendar, Settings, User, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
-import { getUserRank, getNextRank, calculateProgressToNextRank } from "@/lib/user-utils"
+import { getUserRank, getNextRank, calculateProgressToNextRank, getRecommendedSkills } from "@/lib/user-utils"
 import { Progress } from "@/components/ui/progress"
 
-export default function HomeDashboard({ userName, userPoints }: { userName: string; userPoints: number }) {
+export default function HomeDashboard({
+  userName,
+  userPoints,
+  userExperience,
+  userGoal,
+}: {
+  userName: string
+  userPoints: number
+  userExperience: string | null
+  userGoal: string | null
+}) {
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [recommendedSkills, setRecommendedSkills] = useState<any[]>([])
 
   // Update time every second
   useEffect(() => {
@@ -18,8 +29,12 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
       setCurrentTime(new Date())
     }, 1000)
 
+    // Get recommended skills based on user preferences
+    const skills = getRecommendedSkills(userExperience, userGoal)
+    setRecommendedSkills(skills)
+
     return () => clearInterval(timer)
-  }, [])
+  }, [userExperience, userGoal])
 
   // Format time as HH:MM:SS
   const formattedTime = currentTime.toLocaleTimeString()
@@ -71,12 +86,12 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
       <motion.div variants={fadeIn} className="col-span-full md:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome back, {userName} 👋</CardTitle>
+            <CardTitle className="text-2xl">Welcome back, {userName}</CardTitle>
             <CardDescription>{formattedDate}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <div className="text-4xl">⏰</div>
+              <Clock className="h-10 w-10 text-primary" />
               <div className="text-3xl font-bold">{formattedTime}</div>
             </div>
             <p className="mt-4">
@@ -102,7 +117,7 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           <CardContent className="space-y-4">
             <div className="flex justify-center">
               <div className={`h-20 w-20 rounded-full flex items-center justify-center ${userRank.badge}`}>
-                <div className="text-3xl">🏆</div>
+                <Trophy className="h-10 w-10 text-white" />
               </div>
             </div>
 
@@ -133,17 +148,10 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-              {[
-                { name: "Workouts", icon: "💪", href: "/dashboard" },
-                { name: "Skills", icon: "🏆", href: "/skills" },
-                { name: "Exercises", icon: "📚", href: "/exercises" },
-                { name: "Programs", icon: "📅", href: "/programs" },
-                { name: "Profile", icon: "👤", href: "/account/profile" },
-                { name: "Quiz", icon: "🎲", href: "/quiz" },
-              ].map((link, index) => (
+              {quickLinks.map((link, index) => (
                 <Link key={index} href={link.href}>
                   <div className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-muted transition-colors text-center">
-                    <div className="text-3xl mb-1">{link.icon}</div>
+                    <div className="p-2 rounded-full bg-primary/10">{link.icon}</div>
                     <span className="text-sm font-medium">{link.name}</span>
                   </div>
                 </Link>
@@ -163,22 +171,22 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <div className="text-4xl mb-2">💪</div>
+                <Dumbbell className="h-8 w-8 text-primary mb-2" />
                 <span className="text-2xl font-bold">0</span>
                 <span className="text-sm text-muted-foreground">Workouts</span>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <div className="text-4xl mb-2">🏆</div>
+                <Trophy className="h-8 w-8 text-primary mb-2" />
                 <span className="text-2xl font-bold">2</span>
                 <span className="text-sm text-muted-foreground">Achievements</span>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <div className="text-4xl mb-2">🏋️</div>
+                <Dumbbell className="h-8 w-8 text-primary mb-2" />
                 <span className="text-2xl font-bold">0</span>
                 <span className="text-sm text-muted-foreground">Exercises</span>
               </div>
               <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
-                <div className="text-4xl mb-2">⭐</div>
+                <Settings className="h-8 w-8 text-primary mb-2" />
                 <span className="text-2xl font-bold">{userPoints}</span>
                 <span className="text-sm text-muted-foreground">Points</span>
               </div>
@@ -189,6 +197,44 @@ export default function HomeDashboard({ userName, userPoints }: { userName: stri
           </CardFooter>
         </Card>
       </motion.div>
+
+      {/* Recommended Skills Based on Quiz */}
+      {recommendedSkills.length > 0 && (
+        <motion.div variants={fadeIn} className="col-span-full">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recommended Skills</CardTitle>
+              <CardDescription>Based on your experience level and goals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                {recommendedSkills.slice(0, 3).map((skill, index) => (
+                  <Link key={index} href={`/skills/${skill.slug}`}>
+                    <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
+                      <CardHeader className="p-4">
+                        <CardTitle className="text-base">{skill.name}</CardTitle>
+                        <CardDescription className="text-xs">{skill.description}</CardDescription>
+                      </CardHeader>
+                      <CardFooter className="p-4 pt-0">
+                        <Button variant="ghost" size="sm" className="w-full justify-between">
+                          View Skill <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Link href="/skills" className="w-full">
+                <Button variant="outline" className="w-full">
+                  View All Skills
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+        </motion.div>
+      )}
     </motion.div>
   )
 }

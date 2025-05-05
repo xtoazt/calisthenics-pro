@@ -6,8 +6,10 @@ import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dumbbell, ChevronLeft, LogOut } from "lucide-react"
+import { Dumbbell, ChevronLeft, LogOut, CheckCircle } from "lucide-react"
 import { motion } from "framer-motion"
+import { toast } from "@/components/ui/use-toast"
+import { saveCompletedSkill, isSkillLevelCompleted } from "@/lib/workout-utils"
 
 export default function SkillDetailPage() {
   const router = useRouter()
@@ -15,6 +17,7 @@ export default function SkillDetailPage() {
   const [userName, setUserName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [skill, setSkill] = useState<any>(null)
+  const [completedLevels, setCompletedLevels] = useState<Record<string, boolean>>({})
 
   // Check if user is logged in and has completed the quiz
   useEffect(() => {
@@ -43,8 +46,36 @@ export default function SkillDetailPage() {
     }
 
     setSkill(skillData)
+
+    // Check which levels are completed
+    if (skillData) {
+      const completed: Record<string, boolean> = {}
+      skillData.progression.forEach((level: any) => {
+        completed[level.name] = isSkillLevelCompleted(skillSlug, level.name)
+      })
+      setCompletedLevels(completed)
+    }
+
     setLoading(false)
   }, [router, params])
+
+  const handleMarkAsCompleted = (levelName: string) => {
+    if (!skill) return
+
+    // Save the completed skill
+    saveCompletedSkill(params.skill as string, skill.name, levelName)
+
+    // Update state
+    setCompletedLevels({
+      ...completedLevels,
+      [levelName]: true,
+    })
+
+    toast({
+      title: "Level completed!",
+      description: `You've completed the ${levelName} level of ${skill.name}!`,
+    })
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("user")
@@ -145,44 +176,58 @@ export default function SkillDetailPage() {
 
                 <TabsContent value="progression" className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
-                    {skill.progression.map((level: any, index: number) => (
-                      <motion.div
-                        key={index}
-                        variants={fadeIn}
-                        whileHover={{ scale: 1.02 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      >
-                        <Card
-                          className={`border-t-4 h-full`}
-                          style={{ borderTopColor: `hsl(var(--${level.color.split("-")[1]}-500))` }}
+                    {skill.progression.map((level: any, index: number) => {
+                      const isCompleted = completedLevels[level.name] || false
+
+                      return (
+                        <motion.div
+                          key={index}
+                          variants={fadeIn}
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
-                          <CardHeader className="p-4">
-                            <div className="flex justify-between items-center">
-                              <CardTitle className={`text-xl ${level.textColor}`}>{level.name}</CardTitle>
-                              <div className={`text-xs px-2 py-1 rounded-full bg-gradient-to-r ${level.badgeColor}`}>
-                                Level {index + 1}
+                          <Card
+                            className={`border-t-4 h-full ${isCompleted ? "border-green-500" : ""}`}
+                            style={{
+                              borderTopColor: isCompleted ? "#22c55e" : `hsl(var(--${level.color.split("-")[1]}-500))`,
+                            }}
+                          >
+                            <CardHeader className="p-4">
+                              <div className="flex justify-between items-center">
+                                <CardTitle className={`text-xl ${isCompleted ? "text-green-700" : level.textColor}`}>
+                                  {level.name}
+                                  {isCompleted && <CheckCircle className="inline-block ml-2 h-5 w-5 text-green-600" />}
+                                </CardTitle>
+                                <div className={`text-xs px-2 py-1 rounded-full bg-gradient-to-r ${level.badgeColor}`}>
+                                  Level {index + 1}
+                                </div>
                               </div>
-                            </div>
-                            <CardDescription>{level.description}</CardDescription>
-                          </CardHeader>
-                          <CardContent className="p-4 pt-0">
-                            <ul className="space-y-2">
-                              {level.steps.map((step: string, stepIndex: number) => (
-                                <li key={stepIndex} className="flex items-start gap-2">
-                                  <div className="text-primary flex-shrink-0 mt-0.5">✅</div>
-                                  <span>{step}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </CardContent>
-                          <CardFooter className="p-4 pt-0">
-                            <Button variant="outline" className="w-full">
-                              Mark as Completed
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      </motion.div>
-                    ))}
+                              <CardDescription>{level.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0">
+                              <ul className="space-y-2">
+                                {level.steps.map((step: string, stepIndex: number) => (
+                                  <li key={stepIndex} className="flex items-start gap-2">
+                                    <div className="text-primary flex-shrink-0 mt-0.5">✅</div>
+                                    <span>{step}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </CardContent>
+                            <CardFooter className="p-4 pt-0">
+                              <Button
+                                variant={isCompleted ? "outline" : "default"}
+                                className={`w-full ${isCompleted ? "text-green-700 border-green-500" : ""}`}
+                                onClick={() => handleMarkAsCompleted(level.name)}
+                                disabled={isCompleted}
+                              >
+                                {isCompleted ? "Completed ✓" : "Mark as Completed"}
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        </motion.div>
+                      )
+                    })}
                   </div>
                 </TabsContent>
 
@@ -972,5 +1017,5 @@ function getSkillData(slug: string) {
     },
   }
 
-  return skills[slug] || null
+  return skills[slug as keyof typeof skills] || null
 }

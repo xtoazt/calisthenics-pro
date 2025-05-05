@@ -1,9 +1,15 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { Apple, Beef, Fish, Egg, Carrot, Wheat } from "lucide-react"
+import { getNutritionRecommendations } from "@/lib/user-utils"
 
 export default function NutritionGuide() {
-  const dailyNutrition = {
+  const [userGoal, setUserGoal] = useState<string | null>(null)
+  const [dailyNutrition, setDailyNutrition] = useState<any>({
     calories: {
       target: 2500,
       current: 1850,
@@ -28,7 +34,19 @@ export default function NutritionGuide() {
       current: 1800,
       unit: "ml",
     },
-  }
+  })
+  const [recommendedPlan, setRecommendedPlan] = useState<string>("Maintenance")
+
+  useEffect(() => {
+    // Get user goal from localStorage
+    const goal = localStorage.getItem("userGoal")
+    setUserGoal(goal)
+
+    // Get nutrition recommendations based on goal
+    const recommendations = getNutritionRecommendations(goal)
+    setDailyNutrition(recommendations)
+    setRecommendedPlan(recommendations.recommendedPlan)
+  }, [])
 
   const mealPlans = [
     {
@@ -134,7 +152,11 @@ export default function NutritionGuide() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Nutrition Guide</CardTitle>
-        <CardDescription>Personalized nutrition recommendations for your goals</CardDescription>
+        <CardDescription>
+          {userGoal
+            ? `Personalized nutrition recommendations for your ${userGoal} goals`
+            : "Personalized nutrition recommendations for your goals"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="tracking">
@@ -144,18 +166,20 @@ export default function NutritionGuide() {
           </TabsList>
           <TabsContent value="tracking" className="space-y-4 mt-4">
             <div className="space-y-4">
-              {Object.entries(dailyNutrition).map(([key, value]) => (
-                <div key={key} className="space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium capitalize">{key}</span>
-                    <span className="text-sm">
-                      {value.current} / {value.target}
-                      {value.unit ? ` ${value.unit}` : ""}
-                    </span>
+              {Object.entries(dailyNutrition)
+                .filter(([key]) => key !== "recommendedPlan")
+                .map(([key, value]) => (
+                  <div key={key} className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium capitalize">{key}</span>
+                      <span className="text-sm">
+                        {value.current} / {value.target}
+                        {value.unit ? ` ${value.unit}` : ""}
+                      </span>
+                    </div>
+                    <Progress value={calculatePercentage(value.current, value.target)} />
                   </div>
-                  <Progress value={calculatePercentage(value.current, value.target)} />
-                </div>
-              ))}
+                ))}
             </div>
 
             <div className="mt-6">
@@ -163,37 +187,37 @@ export default function NutritionGuide() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <div className="text-xl">🥩</div>
+                    <Beef className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xs">Lean Protein</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <div className="text-xl">🥦</div>
+                    <Carrot className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xs">Vegetables</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <div className="text-xl">🍎</div>
+                    <Apple className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xs">Fruits</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <div className="text-xl">🌾</div>
+                    <Wheat className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xs">Whole Grains</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <div className="text-xl">🥑</div>
+                    <Egg className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xs">Healthy Fats</span>
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <div className="text-xl">🐟</div>
+                    <Fish className="h-5 w-5 text-primary" />
                   </div>
                   <span className="text-xs">Omega-3s</span>
                 </div>
@@ -201,7 +225,7 @@ export default function NutritionGuide() {
             </div>
           </TabsContent>
           <TabsContent value="meal-plans" className="mt-4">
-            <Tabs defaultValue="Strength Building">
+            <Tabs defaultValue={recommendedPlan}>
               <TabsList className="mb-4">
                 {mealPlans.map((plan) => (
                   <TabsTrigger key={plan.name} value={plan.name}>
@@ -212,7 +236,14 @@ export default function NutritionGuide() {
               {mealPlans.map((plan) => (
                 <TabsContent key={plan.name} value={plan.name}>
                   <div className="mb-4">
-                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {plan.name === recommendedPlan ? (
+                        <span className="font-medium text-primary">Recommended for your goals: </span>
+                      ) : (
+                        ""
+                      )}
+                      {plan.description}
+                    </p>
                   </div>
                   <div className="space-y-4">
                     {plan.meals.map((meal, index) => (

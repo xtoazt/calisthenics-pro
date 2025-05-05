@@ -11,6 +11,8 @@ import { calculateUserPoints } from "@/lib/user-utils"
 export default function Home() {
   const [quizCompleted, setQuizCompleted] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
+  const [userExperience, setUserExperience] = useState<string | null>(null)
+  const [userGoal, setUserGoal] = useState<string | null>(null)
   const [userPoints, setUserPoints] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -19,10 +21,13 @@ export default function Home() {
     const quizStatus = localStorage.getItem("quizCompleted")
     const user = localStorage.getItem("user")
     const experience = localStorage.getItem("userExperience")
+    const goal = localStorage.getItem("userGoal")
 
     if (quizStatus === "true" && user) {
       setQuizCompleted(true)
       setUserName(user)
+      setUserExperience(experience)
+      setUserGoal(goal)
 
       // Calculate user points
       const points = calculateUserPoints(user, experience)
@@ -89,7 +94,12 @@ export default function Home() {
         </header>
         <main className="flex-1 py-12">
           <div className="container px-4 md:px-6">
-            <HomeDashboard userName={userName} userPoints={userPoints} />
+            <HomeDashboard
+              userName={userName}
+              userPoints={userPoints}
+              userExperience={userExperience}
+              userGoal={userGoal}
+            />
           </div>
         </main>
         <footer className="border-t py-6 md:py-8">

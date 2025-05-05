@@ -106,6 +106,7 @@ export function calculateProgressToNextRank(points: number, currentRank: any, ne
 
 // Get personalized workouts based on user preferences
 export function getPersonalizedWorkouts(experience: string | null, goal: string | null, equipment: string | null) {
+  // Base workouts with default images
   const baseWorkouts = [
     {
       title: "Full Body Basics",
@@ -113,6 +114,7 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       duration: "30-45 min",
       color: "from-blue-500/20 to-blue-600/30",
       icon: "💪",
+      image: "/placeholder.svg?height=300&width=400&text=Full+Body",
     },
     {
       title: "Upper Body Focus",
@@ -120,6 +122,7 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       duration: "30-45 min",
       color: "from-green-500/20 to-green-600/30",
       icon: "🏋️",
+      image: "/placeholder.svg?height=300&width=400&text=Upper+Body",
     },
     {
       title: "Core Foundations",
@@ -127,6 +130,7 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       duration: "20-30 min",
       color: "from-yellow-500/20 to-yellow-600/30",
       icon: "🔄",
+      image: "/placeholder.svg?height=300&width=400&text=Core",
     },
     {
       title: "Lower Body Power",
@@ -134,6 +138,7 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       duration: "30-40 min",
       color: "from-purple-500/20 to-purple-600/30",
       icon: "🦵",
+      image: "/placeholder.svg?height=300&width=400&text=Lower+Body",
     },
     {
       title: "Skill Development",
@@ -141,6 +146,7 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       duration: "45-60 min",
       color: "from-red-500/20 to-red-600/30",
       icon: "🤸",
+      image: "/placeholder.svg?height=300&width=400&text=Skills",
     },
     {
       title: "HIIT Cardio",
@@ -148,6 +154,7 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       duration: "20-30 min",
       color: "from-orange-500/20 to-orange-600/30",
       icon: "🔥",
+      image: "/placeholder.svg?height=300&width=400&text=HIIT",
     },
   ]
 
@@ -160,6 +167,14 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       title: workout.title.includes("Skill") ? "Beginner Skills" : workout.title,
       description: `Beginner-friendly ${workout.description.toLowerCase()}`,
       duration: workout.duration.includes("45") ? "20-30 min" : workout.duration,
+      difficulty: "Beginner",
+    }))
+  } else if (experience === "intermediate") {
+    customizedWorkouts = baseWorkouts.map((workout) => ({
+      ...workout,
+      title: workout.title.includes("Basics") ? "Intermediate Techniques" : workout.title,
+      description: `Intermediate ${workout.description.toLowerCase()}`,
+      difficulty: "Intermediate",
     }))
   } else if (experience === "advanced") {
     customizedWorkouts = baseWorkouts.map((workout) => ({
@@ -167,26 +182,80 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
       title: workout.title.includes("Basics") ? "Advanced Techniques" : workout.title,
       description: `Advanced ${workout.description.toLowerCase()}`,
       duration: workout.duration.includes("20") ? "30-45 min" : workout.duration,
+      difficulty: "Advanced",
     }))
   }
 
   // Customize based on goal
   if (goal === "strength") {
-    customizedWorkouts = customizedWorkouts.map((workout) =>
-      workout.title.includes("Upper Body") || workout.title.includes("Lower Body")
-        ? { ...workout, color: "from-red-500/20 to-red-600/30" }
-        : workout,
-    )
+    customizedWorkouts = customizedWorkouts.map((workout) => {
+      if (workout.title.includes("Upper Body") || workout.title.includes("Lower Body")) {
+        return {
+          ...workout,
+          color: "from-red-500/20 to-red-600/30",
+          priority: "high",
+        }
+      }
+      return workout
+    })
+
+    // Add a strength-specific workout
+    customizedWorkouts.push({
+      title: "Strength Progressions",
+      description: "Focus on building raw strength with progressive overload",
+      duration: "40-50 min",
+      color: "from-red-500/20 to-red-600/30",
+      icon: "💪",
+      image: "/placeholder.svg?height=300&width=400&text=Strength",
+      difficulty: experience || "Intermediate",
+      priority: "high",
+    })
   } else if (goal === "skills") {
-    customizedWorkouts = customizedWorkouts.map((workout) =>
-      workout.title.includes("Skill") ? { ...workout, color: "from-purple-500/20 to-purple-600/30" } : workout,
-    )
+    customizedWorkouts = customizedWorkouts.map((workout) => {
+      if (workout.title.includes("Skill")) {
+        return {
+          ...workout,
+          color: "from-purple-500/20 to-purple-600/30",
+          priority: "high",
+        }
+      }
+      return workout
+    })
+
+    // Add a skill-specific workout
+    customizedWorkouts.push({
+      title: "Skill Mastery",
+      description: "Dedicated practice for mastering impressive calisthenics skills",
+      duration: "40-50 min",
+      color: "from-purple-500/20 to-purple-600/30",
+      icon: "🤸",
+      image: "/placeholder.svg?height=300&width=400&text=Skills+Mastery",
+      difficulty: experience || "Intermediate",
+      priority: "high",
+    })
   } else if (goal === "endurance") {
-    customizedWorkouts = customizedWorkouts.map((workout) =>
-      workout.title.includes("HIIT") || workout.title.includes("Full Body")
-        ? { ...workout, color: "from-blue-500/20 to-blue-600/30" }
-        : workout,
-    )
+    customizedWorkouts = customizedWorkouts.map((workout) => {
+      if (workout.title.includes("HIIT") || workout.title.includes("Full Body")) {
+        return {
+          ...workout,
+          color: "from-blue-500/20 to-blue-600/30",
+          priority: "high",
+        }
+      }
+      return workout
+    })
+
+    // Add an endurance-specific workout
+    customizedWorkouts.push({
+      title: "Endurance Circuit",
+      description: "High-rep, low-rest circuit to build muscular endurance",
+      duration: "30-40 min",
+      color: "from-blue-500/20 to-blue-600/30",
+      icon: "🔄",
+      image: "/placeholder.svg?height=300&width=400&text=Endurance",
+      difficulty: experience || "Intermediate",
+      priority: "high",
+    })
   }
 
   // Customize based on equipment
@@ -194,13 +263,40 @@ export function getPersonalizedWorkouts(experience: string | null, goal: string 
     customizedWorkouts = customizedWorkouts.map((workout) => ({
       ...workout,
       description: workout.description + " (bodyweight only)",
+      equipment: "None",
+    }))
+  } else if (equipment === "minimal") {
+    customizedWorkouts = customizedWorkouts.map((workout) => ({
+      ...workout,
+      description: workout.description + " (minimal equipment)",
+      equipment: "Minimal",
     }))
   } else if (equipment === "full") {
     customizedWorkouts = customizedWorkouts.map((workout) => ({
       ...workout,
       description: workout.description + " (with equipment)",
+      equipment: "Full",
     }))
+
+    // Add an equipment-specific workout
+    customizedWorkouts.push({
+      title: "Equipment Mastery",
+      description: "Maximize your gains using all available equipment",
+      duration: "40-50 min",
+      color: "from-green-500/20 to-green-600/30",
+      icon: "🏋️",
+      image: "/placeholder.svg?height=300&width=400&text=Equipment",
+      difficulty: experience || "Intermediate",
+      equipment: "Full",
+    })
   }
+
+  // Sort workouts to prioritize those matching user's goals
+  customizedWorkouts.sort((a, b) => {
+    if (a.priority === "high" && b.priority !== "high") return -1
+    if (a.priority !== "high" && b.priority === "high") return 1
+    return 0
+  })
 
   return customizedWorkouts
 }
@@ -230,4 +326,295 @@ export function getWelcomeMessage(name: string | null, experience: string | null
   }
 
   return message
+}
+
+// Get recommended skills based on user preferences
+export function getRecommendedSkills(experience: string | null, goal: string | null) {
+  const allSkills = [
+    {
+      name: "Pull-Ups",
+      description: "Master the fundamental vertical pulling movement",
+      category: "upper",
+      difficulty: "beginner-intermediate",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: false,
+      slug: "pull-ups",
+    },
+    {
+      name: "Push-Ups",
+      description: "Build pushing strength with progressive variations",
+      category: "upper",
+      difficulty: "beginner",
+      forStrength: true,
+      forSkills: false,
+      forEndurance: true,
+      slug: "push-ups",
+    },
+    {
+      name: "Dips",
+      description: "Develop triceps and chest strength",
+      category: "upper",
+      difficulty: "intermediate",
+      forStrength: true,
+      forSkills: false,
+      forEndurance: false,
+      slug: "dips",
+    },
+    {
+      name: "Handstand",
+      description: "Master the art of balance and shoulder strength",
+      category: "balance",
+      difficulty: "intermediate-advanced",
+      forStrength: false,
+      forSkills: true,
+      forEndurance: false,
+      slug: "handstand",
+    },
+    {
+      name: "Planche",
+      description: "The ultimate test of upper body strength",
+      category: "strength",
+      difficulty: "advanced",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: false,
+      slug: "planche",
+    },
+    {
+      name: "Front Lever",
+      description: "Build incredible core and back strength",
+      category: "core",
+      difficulty: "advanced",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: false,
+      slug: "front-lever",
+    },
+    {
+      name: "Muscle-Up",
+      description: "The pinnacle of pull-up and dip combination",
+      category: "upper",
+      difficulty: "advanced",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: false,
+      slug: "muscle-up",
+    },
+    {
+      name: "Pistol Squat",
+      description: "Single-leg strength and balance",
+      category: "lower",
+      difficulty: "intermediate",
+      forStrength: true,
+      forSkills: false,
+      forEndurance: true,
+      slug: "pistol-squat",
+    },
+    {
+      name: "Human Flag",
+      description: "The ultimate display of core and grip strength",
+      category: "strength",
+      difficulty: "advanced",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: false,
+      slug: "human-flag",
+    },
+    {
+      name: "L-Sit",
+      description: "Fundamental core and compression strength",
+      category: "core",
+      difficulty: "intermediate",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: true,
+      slug: "l-sit",
+    },
+    {
+      name: "Burpees",
+      description: "Full-body exercise for conditioning",
+      category: "cardio",
+      difficulty: "beginner",
+      forStrength: false,
+      forSkills: false,
+      forEndurance: true,
+      slug: "burpees",
+    },
+    {
+      name: "Hollow Body Hold",
+      description: "Essential core exercise for all calisthenics",
+      category: "core",
+      difficulty: "beginner",
+      forStrength: true,
+      forSkills: true,
+      forEndurance: true,
+      slug: "hollow-body",
+    },
+  ]
+
+  // Filter skills based on experience level
+  let filteredSkills = [...allSkills]
+
+  if (experience === "beginner") {
+    filteredSkills = filteredSkills.filter(
+      (skill) => skill.difficulty === "beginner" || skill.difficulty.includes("beginner"),
+    )
+  } else if (experience === "intermediate") {
+    filteredSkills = filteredSkills.filter(
+      (skill) =>
+        skill.difficulty === "intermediate" ||
+        skill.difficulty.includes("intermediate") ||
+        skill.difficulty === "beginner",
+    )
+  }
+  // Advanced users get all skills
+
+  // Further filter based on goal
+  if (goal === "strength") {
+    filteredSkills = filteredSkills.filter((skill) => skill.forStrength)
+    // Prioritize strength skills
+    filteredSkills.sort((a, b) => {
+      if (a.forStrength && !b.forStrength) return -1
+      if (!a.forStrength && b.forStrength) return 1
+      return 0
+    })
+  } else if (goal === "skills") {
+    filteredSkills = filteredSkills.filter((skill) => skill.forSkills)
+    // Prioritize skills-focused exercises
+    filteredSkills.sort((a, b) => {
+      if (a.forSkills && !b.forSkills) return -1
+      if (!a.forSkills && b.forSkills) return 1
+      return 0
+    })
+  } else if (goal === "endurance") {
+    filteredSkills = filteredSkills.filter((skill) => skill.forEndurance)
+    // Prioritize endurance exercises
+    filteredSkills.sort((a, b) => {
+      if (a.forEndurance && !b.forEndurance) return -1
+      if (!a.forEndurance && b.forEndurance) return 1
+      return 0
+    })
+  }
+
+  // Return top skills (limited to 6)
+  return filteredSkills.slice(0, 6)
+}
+
+// Get nutrition recommendations based on user goals
+export function getNutritionRecommendations(goal: string | null) {
+  if (goal === "strength") {
+    return {
+      calories: {
+        target: 2800,
+        current: 2100,
+      },
+      protein: {
+        target: 200,
+        current: 150,
+        unit: "g",
+      },
+      carbs: {
+        target: 350,
+        current: 260,
+        unit: "g",
+      },
+      fat: {
+        target: 80,
+        current: 65,
+        unit: "g",
+      },
+      water: {
+        target: 3500,
+        current: 2200,
+        unit: "ml",
+      },
+      recommendedPlan: "Strength Building",
+    }
+  } else if (goal === "endurance") {
+    return {
+      calories: {
+        target: 2500,
+        current: 1900,
+      },
+      protein: {
+        target: 150,
+        current: 110,
+        unit: "g",
+      },
+      carbs: {
+        target: 400,
+        current: 300,
+        unit: "g",
+      },
+      fat: {
+        target: 60,
+        current: 45,
+        unit: "g",
+      },
+      water: {
+        target: 4000,
+        current: 2500,
+        unit: "ml",
+      },
+      recommendedPlan: "Maintenance",
+    }
+  } else if (goal === "skills") {
+    return {
+      calories: {
+        target: 2600,
+        current: 2000,
+      },
+      protein: {
+        target: 180,
+        current: 140,
+        unit: "g",
+      },
+      carbs: {
+        target: 320,
+        current: 240,
+        unit: "g",
+      },
+      fat: {
+        target: 70,
+        current: 55,
+        unit: "g",
+      },
+      water: {
+        target: 3200,
+        current: 2000,
+        unit: "ml",
+      },
+      recommendedPlan: "Strength Building",
+    }
+  } else {
+    // Default/balanced nutrition
+    return {
+      calories: {
+        target: 2500,
+        current: 1850,
+      },
+      protein: {
+        target: 180,
+        current: 120,
+        unit: "g",
+      },
+      carbs: {
+        target: 300,
+        current: 220,
+        unit: "g",
+      },
+      fat: {
+        target: 80,
+        current: 65,
+        unit: "g",
+      },
+      water: {
+        target: 3000,
+        current: 1800,
+        unit: "ml",
+      },
+      recommendedPlan: "Maintenance",
+    }
+  }
 }
