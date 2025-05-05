@@ -1,30 +1,29 @@
-# Calisthenics training site
+# CalisthenicsPro
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/alphas-projects-fe88b5fd/v0-calisthenics-training-site)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/Tg8I5WEz2Sv)
+**An open-source, no-sign-up calisthenics platform designed for performance, accessibility, and real-world results.**
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+**CalisthenicsPro** is a free, web-based fitness platform focused on calisthenics and bodyweight training. It provides high-quality programming without the need for user accounts, subscriptions, or downloads. Whether you're a beginner or an advanced athlete, CalisthenicsPro offers structured, effective routines designed to help you build strength, mobility, and control.
 
-## Deployment
+- ✅ Completely Free to Use
+- 🔓 Fully Open Source
+- 🙅‍♂️ No Sign-Up Required
+- 📈 Progression-Based Programs
+- 🌐 Optimized for All Devices
 
-Your project is live at:
+## Features
 
-**[https://vercel.com/alphas-projects-fe88b5fd/v0-calisthenics-training-site](https://vercel.com/alphas-projects-fe88b5fd/v0-calisthenics-training-site)**
+- **Structured Training Plans** – Progressively designed routines tailored to various skill levels and goals.
+- **Exercise Library** – A comprehensive collection of calisthenics movements with detailed instructions and visual references.
+- **No User Data Required** – Privacy-focused; no login, tracking, or data collection.
+- **Clean, Responsive Interface** – Works seamlessly across desktops, tablets, and mobile devices.
 
-## Build your app
+## Get Started
 
-Continue building your app on:
+Visit the platform to begin training instantly:  
+**[https://calisthenicspro.vercel.app]**
 
-**[https://v0.dev/chat/projects/Tg8I5WEz2Sv](https://v0.dev/chat/projects/Tg8I5WEz2Sv)**
+No registration. No paywalls. Just training.
 
-## How It Works
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
