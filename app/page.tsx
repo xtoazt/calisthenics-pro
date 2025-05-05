@@ -1,11 +1,37 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Dumbbell, Award, Users } from "lucide-react"
 import { motion } from "framer-motion"
+import HomeDashboard from "./components/home-dashboard"
+import { calculateUserPoints } from "@/lib/user-utils"
 
 export default function Home() {
+  const [quizCompleted, setQuizCompleted] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
+  const [userPoints, setUserPoints] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Check if quiz is completed
+    const quizStatus = localStorage.getItem("quizCompleted")
+    const user = localStorage.getItem("user")
+    const experience = localStorage.getItem("userExperience")
+
+    if (quizStatus === "true" && user) {
+      setQuizCompleted(true)
+      setUserName(user)
+
+      // Calculate user points
+      const points = calculateUserPoints(user, experience)
+      setUserPoints(points)
+    }
+
+    setLoading(false)
+  }, [])
+
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -21,6 +47,72 @@ export default function Home() {
     },
   }
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If quiz is completed, show dashboard
+  if (quizCompleted && userName) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <header className="border-b">
+          <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+            <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+              <Dumbbell className="h-6 w-6" />
+              <span>CalisthenicsPro</span>
+            </Link>
+            <nav className="hidden md:flex gap-6">
+              <Link href="/skills" className="text-sm font-medium hover:underline underline-offset-4">
+                Skill Progressions
+              </Link>
+              <Link href="/exercises" className="text-sm font-medium hover:underline underline-offset-4">
+                Exercise Library
+              </Link>
+              <Link href="/programs" className="text-sm font-medium hover:underline underline-offset-4">
+                Programs
+              </Link>
+              <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4">
+                About
+              </Link>
+              <Link href="/account/profile" className="text-sm font-medium hover:underline underline-offset-4">
+                My Account
+              </Link>
+            </nav>
+          </div>
+        </header>
+        <main className="flex-1 py-12">
+          <div className="container px-4 md:px-6">
+            <HomeDashboard userName={userName} userPoints={userPoints} />
+          </div>
+        </main>
+        <footer className="border-t py-6 md:py-8">
+          <div className="container flex flex-col items-center justify-between gap-4 md:flex-row px-4 md:px-6">
+            <div className="flex flex-col items-center gap-4 md:items-start md:gap-2">
+              <Link href="/" className="flex items-center gap-2 text-lg font-bold">
+                <Dumbbell className="h-6 w-6" />
+                <span>CalisthenicsPro</span>
+              </Link>
+              <p className="text-center text-sm text-muted-foreground md:text-left">
+                Your journey to bodyweight mastery starts here.
+              </p>
+            </div>
+            <p className="text-center text-sm text-muted-foreground md:text-right">
+              Made By Rohan Salem &copy; {new Date().getFullYear()}. All rights reserved.
+            </p>
+          </div>
+        </footer>
+      </div>
+    )
+  }
+
+  // Otherwise, show landing page
   return (
     <div className="flex flex-col min-h-screen">
       <header className="border-b">

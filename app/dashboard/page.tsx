@@ -1,5 +1,7 @@
 "use client"
 
+import { Progress } from "@/components/ui/progress"
+
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -12,6 +14,14 @@ import RepCounter from "../components/rep-counter"
 import { motion } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
 import Leaderboard from "../components/leaderboard"
+import {
+  calculateUserPoints,
+  getUserRank,
+  getNextRank,
+  calculateProgressToNextRank,
+  getPersonalizedWorkouts,
+  getWelcomeMessage,
+} from "@/lib/user-utils"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -19,6 +29,7 @@ export default function DashboardPage() {
   const [userExperience, setUserExperience] = useState<string | null>(null)
   const [userGoal, setUserGoal] = useState<string | null>(null)
   const [userEquipment, setUserEquipment] = useState<string | null>(null)
+  const [userPoints, setUserPoints] = useState(0)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("workouts")
 
@@ -38,20 +49,35 @@ export default function DashboardPage() {
       return
     }
 
+    const experience = localStorage.getItem("userExperience")
+    const goal = localStorage.getItem("userGoal")
+    const equipment = localStorage.getItem("userEquipment")
+
     setUserName(user)
-    setUserExperience(localStorage.getItem("userExperience"))
-    setUserGoal(localStorage.getItem("userGoal"))
-    setUserEquipment(localStorage.getItem("userEquipment"))
+    setUserExperience(experience)
+    setUserGoal(goal)
+    setUserEquipment(equipment)
+
+    // Calculate user points based on name and experience
+    const points = calculateUserPoints(user, experience)
+    setUserPoints(points)
+
     setLoading(false)
   }, [router])
 
   const handleLogout = () => {
     localStorage.removeItem("user")
     localStorage.removeItem("quizCompleted")
+    localStorage.removeItem("userExperience")
+    localStorage.removeItem("userGoal")
+    localStorage.removeItem("userEquipment")
 
     // Also clear cookies
     document.cookie = "user=; path=/; max-age=0"
     document.cookie = "quizCompleted=; path=/; max-age=0"
+    document.cookie = "userExperience=; path=/; max-age=0"
+    document.cookie = "userGoal=; path=/; max-age=0"
+    document.cookie = "userEquipment=; path=/; max-age=0"
 
     toast({
       title: "Signed out successfully",
@@ -76,72 +102,15 @@ export default function DashboardPage() {
     )
   }
 
-  // Generate workouts based on user preferences
-  const getWorkouts = () => {
-    const baseWorkouts = [
-      {
-        title: "Full Body Basics",
-        description: "A complete workout focusing on fundamental movements",
-        duration: "30-45 min",
-        color: "from-blue-500/20 to-blue-600/30",
-        icon: "💪",
-      },
-      {
-        title: "Upper Body Focus",
-        description: "Build strength in your chest, back, and arms",
-        duration: "30-45 min",
-        color: "from-green-500/20 to-green-600/30",
-        icon: "🏋️",
-      },
-      {
-        title: "Core Foundations",
-        description: "Develop a strong and stable midsection",
-        duration: "20-30 min",
-        color: "from-yellow-500/20 to-yellow-600/30",
-        icon: "🔄",
-      },
-      {
-        title: "Lower Body Power",
-        description: "Build strength and explosiveness in your legs",
-        duration: "30-40 min",
-        color: "from-purple-500/20 to-purple-600/30",
-        icon: "🦵",
-      },
-      {
-        title: "Skill Development",
-        description: "Focus on progressions for advanced skills",
-        duration: "45-60 min",
-        color: "from-red-500/20 to-red-600/30",
-        icon: "🤸",
-      },
-      {
-        title: "HIIT Cardio",
-        description: "High-intensity interval training for conditioning",
-        duration: "20-30 min",
-        color: "from-orange-500/20 to-orange-600/30",
-        icon: "🔥",
-      },
-    ]
+  // Get personalized workouts based on user preferences
+  const workouts = getPersonalizedWorkouts(userExperience, userGoal, userEquipment)
 
-    // Customize based on experience
-    if (userExperience === "beginner") {
-      return baseWorkouts.map((workout) => ({
-        ...workout,
-        title: workout.title.includes("Skill") ? "Beginner Skills" : workout.title,
-        description: `Beginner-friendly ${workout.description.toLowerCase()}`,
-      }))
-    } else if (userExperience === "advanced") {
-      return baseWorkouts.map((workout) => ({
-        ...workout,
-        title: workout.title.includes("Basics") ? "Advanced Techniques" : workout.title,
-        description: `Advanced ${workout.description.toLowerCase()}`,
-      }))
-    }
+  // Get personalized welcome message
+  const welcomeMessage = getWelcomeMessage(userName, userExperience, userGoal)
 
-    return baseWorkouts
-  }
-
-  const workouts = getWorkouts()
+  // Get user's current rank
+  const userRankData = getUserRank(userPoints)
+  const nextRankData = getNextRank(userRankData.name)
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -198,12 +167,10 @@ export default function DashboardPage() {
           >
             <motion.div variants={fadeIn} className="col-span-full">
               <h1 className="text-3xl font-bold tracking-tighter">Welcome, {userName}</h1>
-              <p className="text-muted-foreground">
-                Here are some workouts to get you started. Track your progress and stay consistent!
-              </p>
+              <p className="text-muted-foreground">{welcomeMessage}</p>
             </motion.div>
 
-            <motion.div variants={fadeIn} className="col-span-full">
+            <motion.div variants={fadeIn} className="col-span-full md:col-span-2">
               <Card className="overflow-hidden">
                 <CardHeader>
                   <CardTitle>Getting Started</CardTitle>
@@ -221,6 +188,46 @@ export default function DashboardPage() {
                     <li>Come back regularly to maintain your progress</li>
                   </ol>
                 </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div variants={fadeIn} className="col-span-full md:col-span-1">
+              <Card
+                className="border-t-4 h-full"
+                style={{ borderTopColor: `hsl(var(--${userRankData.color.split("-")[1]}-500))` }}
+              >
+                <CardHeader>
+                  <CardTitle>Your Rank: {userRankData.name}</CardTitle>
+                  <CardDescription>{userPoints} points earned</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-center">
+                    <div className={`h-20 w-20 rounded-full flex items-center justify-center ${userRankData.badge}`}>
+                      <Trophy className="h-10 w-10 text-white" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className={userRankData.textColor}>{userRankData.name}</span>
+                      <span>{nextRankData.name}</span>
+                    </div>
+                    <Progress
+                      value={calculateProgressToNextRank(userPoints, userRankData, nextRankData)}
+                      className={`h-2 ${userRankData.color}`}
+                    />
+                    <p className="text-xs text-center text-muted-foreground">
+                      {nextRankData.minPoints - userPoints} more points needed for next rank
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Link href="/account/profile" className="w-full">
+                    <Button variant="outline" className="w-full">
+                      View Profile
+                    </Button>
+                  </Link>
+                </CardFooter>
               </Card>
             </motion.div>
 

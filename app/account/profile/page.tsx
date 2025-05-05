@@ -9,16 +9,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from "@/components/ui/progress"
 import { motion } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
+import { calculateUserPoints, getUserRank, getNextRank, calculateProgressToNextRank } from "@/lib/user-utils"
 
 export default function ProfilePage() {
   const router = useRouter()
   const [userName, setUserName] = useState<string | null>(null)
+  const [userExperience, setUserExperience] = useState<string | null>(null)
+  const [userPoints, setUserPoints] = useState(0)
   const [loading, setLoading] = useState(true)
 
   // Check if user is logged in and has completed the quiz
   useEffect(() => {
     const user = localStorage.getItem("user")
     const quizCompleted = localStorage.getItem("quizCompleted")
+    const experience = localStorage.getItem("userExperience")
 
     if (!user) {
       router.push("/account")
@@ -31,16 +35,28 @@ export default function ProfilePage() {
     }
 
     setUserName(user)
+    setUserExperience(experience)
+
+    // Calculate user points
+    const points = calculateUserPoints(user, experience)
+    setUserPoints(points)
+
     setLoading(false)
   }, [router])
 
   const handleLogout = () => {
     localStorage.removeItem("user")
     localStorage.removeItem("quizCompleted")
+    localStorage.removeItem("userExperience")
+    localStorage.removeItem("userGoal")
+    localStorage.removeItem("userEquipment")
 
     // Also clear cookies
     document.cookie = "user=; path=/; max-age=0"
     document.cookie = "quizCompleted=; path=/; max-age=0"
+    document.cookie = "userExperience=; path=/; max-age=0"
+    document.cookie = "userGoal=; path=/; max-age=0"
+    document.cookie = "userEquipment=; path=/; max-age=0"
 
     toast({
       title: "Signed out successfully",
@@ -65,75 +81,10 @@ export default function ProfilePage() {
     )
   }
 
-  // Simple rank system based on first letter of username
-  const getRank = () => {
-    if (!userName)
-      return {
-        name: "Novice",
-        color: "bg-zinc-400",
-        progress: 10,
-        badge: "bg-gradient-to-br from-zinc-300 to-zinc-500",
-        textColor: "text-zinc-800",
-      }
-
-    const firstChar = userName.charAt(0).toLowerCase()
-
-    if (firstChar >= "a" && firstChar <= "e") {
-      return {
-        name: "Novice",
-        color: "bg-zinc-400",
-        progress: 10,
-        badge: "bg-gradient-to-br from-zinc-300 to-zinc-500",
-        textColor: "text-zinc-800",
-      }
-    } else if (firstChar >= "f" && firstChar <= "j") {
-      return {
-        name: "Apprentice",
-        color: "bg-green-500",
-        progress: 30,
-        badge: "bg-gradient-to-br from-green-400 to-green-600",
-        textColor: "text-green-800",
-      }
-    } else if (firstChar >= "k" && firstChar <= "o") {
-      return {
-        name: "Adept",
-        color: "bg-blue-500",
-        progress: 50,
-        badge: "bg-gradient-to-br from-blue-400 to-blue-600",
-        textColor: "text-blue-800",
-      }
-    } else if (firstChar >= "p" && firstChar <= "t") {
-      return {
-        name: "Expert",
-        color: "bg-purple-500",
-        progress: 70,
-        badge: "bg-gradient-to-br from-purple-400 to-purple-600",
-        textColor: "text-purple-800",
-      }
-    } else {
-      return {
-        name: "Master",
-        color: "bg-amber-500",
-        progress: 90,
-        badge: "bg-gradient-to-br from-amber-400 to-amber-600",
-        textColor: "text-amber-800",
-      }
-    }
-  }
-
-  const userRank = getRank()
+  // Get user's current rank
+  const userRank = getUserRank(userPoints)
   const nextRank = getNextRank(userRank.name)
-
-  function getNextRank(currentRank: string) {
-    const ranks = ["Novice", "Apprentice", "Adept", "Expert", "Master", "Grandmaster", "Legend"]
-    const currentIndex = ranks.indexOf(currentRank)
-
-    if (currentIndex === -1 || currentIndex === ranks.length - 1) {
-      return "Legend"
-    }
-
-    return ranks[currentIndex + 1]
-  }
+  const progressPercentage = calculateProgressToNextRank(userPoints, userRank, nextRank)
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -211,8 +162,8 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="font-medium text-sm">Account Type</h3>
-                    <p>Standard User</p>
+                    <h3 className="font-medium text-sm">Experience Level</h3>
+                    <p className="capitalize">{userExperience || "Not specified"}</p>
                   </div>
 
                   <div className="space-y-2">
@@ -258,17 +209,17 @@ export default function ProfilePage() {
 
                   <div className="text-center">
                     <h3 className={`text-2xl font-bold ${userRank.textColor}`}>{userRank.name}</h3>
-                    <p className="text-sm text-muted-foreground">Keep training to reach {nextRank}</p>
+                    <p className="text-sm text-muted-foreground">Keep training to reach {nextRank.name}</p>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className={userRank.textColor}>{userRank.name}</span>
-                      <span>{nextRank}</span>
+                      <span>{nextRank.name}</span>
                     </div>
-                    <Progress value={userRank.progress} className={`h-2 ${userRank.color}`} />
+                    <Progress value={progressPercentage} className={`h-2 ${userRank.color}`} />
                     <p className="text-xs text-center text-muted-foreground">
-                      {100 - userRank.progress}% more progress needed for next rank
+                      {userPoints} points ({progressPercentage}% to next rank)
                     </p>
                   </div>
 

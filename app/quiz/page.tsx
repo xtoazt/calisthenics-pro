@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Dumbbell } from "lucide-react"
+import { Dumbbell, CheckCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
 
@@ -19,6 +19,17 @@ export default function QuizPage() {
   const [goal, setGoal] = useState("")
   const [equipment, setEquipment] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [quizAlreadyCompleted, setQuizAlreadyCompleted] = useState(false)
+
+  // Check if quiz is already completed
+  useEffect(() => {
+    const quizCompleted = localStorage.getItem("quizCompleted")
+    const user = localStorage.getItem("user")
+
+    if (quizCompleted === "true" && user) {
+      setQuizAlreadyCompleted(true)
+    }
+  }, [])
 
   const handleNext = () => {
     if (step === 1 && !name) {
@@ -73,6 +84,53 @@ export default function QuizPage() {
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  }
+
+  // If quiz is already completed, show a message and redirect
+  if (quizAlreadyCompleted) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <header className="border-b">
+          <div className="container flex h-16 items-center px-4 md:px-6">
+            <div className="flex items-center gap-2 font-bold text-xl">
+              <Dumbbell className="h-6 w-6" />
+              <span>CalisthenicsPro</span>
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 py-12">
+          <div className="container grid items-center gap-6 px-4 md:px-6">
+            <div className="mx-auto w-full max-w-md space-y-6">
+              <motion.div initial="hidden" animate="visible" variants={fadeIn} className="space-y-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quiz Already Completed</CardTitle>
+                    <CardDescription>You've already completed the onboarding quiz</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+                    <p className="text-center mb-4">
+                      You've already completed the quiz and your preferences are saved. Your dashboard has been
+                      personalized based on your responses.
+                    </p>
+                  </CardContent>
+                  <CardFooter className="flex justify-center">
+                    <Button onClick={() => router.push("/dashboard")}>Go to Dashboard</Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            </div>
+          </div>
+        </main>
+        <footer className="border-t py-6">
+          <div className="container flex flex-col items-center justify-between gap-4 md:flex-row px-4 md:px-6">
+            <p className="text-center text-sm text-muted-foreground">
+              Made By Rohan Salem &copy; {new Date().getFullYear()}. All rights reserved.
+            </p>
+          </div>
+        </footer>
+      </div>
+    )
   }
 
   return (
