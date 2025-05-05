@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Dumbbell, Award, Users } from "lucide-react"
+import { ArrowRight, Dumbbell, Award, Users, LogIn } from "lucide-react"
 import { motion } from "framer-motion"
 
 export default function Home() {
@@ -31,7 +31,7 @@ export default function Home() {
             <span>CalisthenicsPro</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/skills" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link href="/skills-overview" className="text-sm font-medium hover:underline underline-offset-4">
               Skill Progressions
             </Link>
             <Link href="/exercises" className="text-sm font-medium hover:underline underline-offset-4">
@@ -45,6 +45,12 @@ export default function Home() {
             </Link>
           </nav>
           <div className="flex gap-4">
+            <Link href="/account">
+              <Button variant="outline">
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            </Link>
             <Link href="/quiz">
               <Button>Get Started</Button>
             </Link>
@@ -86,7 +92,7 @@ export default function Home() {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <Image
-                  src="/images/hero-banner.png"
+                  src="/placeholder.svg?height=500&width=800"
                   alt="Calisthenics athlete performing a planche"
                   width={800}
                   height={500}

@@ -3,64 +3,40 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Play, Pause, RotateCcw, SkipForward } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
+import { Play, Pause, RotateCcw } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { motion } from "framer-motion"
 
 export default function WorkoutTimer() {
   const [isActive, setIsActive] = useState(false)
   const [isPaused, setIsPaused] = useState(true)
   const [time, setTime] = useState(0)
-  const [currentExercise, setCurrentExercise] = useState(0)
-  const [currentSet, setCurrentSet] = useState(1)
-
-  const exercises = [
-    { name: "Push-Ups", sets: 3, duration: 45, rest: 30 },
-    { name: "Plank", sets: 3, duration: 30, rest: 20 },
-    { name: "Squats", sets: 3, duration: 45, rest: 30 },
-    { name: "Pull-Ups", sets: 3, duration: 30, rest: 30 },
-  ]
-
-  const totalExercises = exercises.length
-  const currentExerciseData = exercises[currentExercise]
-  const totalSets = currentExerciseData.sets
-  const isRest = time >= currentExerciseData.duration
-  const currentDuration = isRest ? currentExerciseData.rest : currentExerciseData.duration
-  const progress = Math.min(100, (time / currentDuration) * 100)
+  const [duration, setDuration] = useState(60) // Default 60 seconds
 
   useEffect(() => {
-    let interval = null
+    let interval: NodeJS.Timeout | null = null
 
     if (isActive && !isPaused) {
       interval = setInterval(() => {
-        setTime((time) => time + 1)
+        setTime((time) => {
+          if (time >= duration) {
+            clearInterval(interval as NodeJS.Timeout)
+            setIsActive(false)
+            setIsPaused(true)
+            return duration
+          }
+          return time + 1
+        })
       }, 1000)
     } else {
-      clearInterval(interval)
+      if (interval) clearInterval(interval)
     }
 
     return () => {
-      clearInterval(interval)
+      if (interval) clearInterval(interval)
     }
-  }, [isActive, isPaused])
-
-  useEffect(() => {
-    if (time >= currentExerciseData.duration + currentExerciseData.rest) {
-      if (currentSet < totalSets) {
-        setCurrentSet(currentSet + 1)
-        setTime(0)
-      } else {
-        if (currentExercise < totalExercises - 1) {
-          setCurrentExercise(currentExercise + 1)
-          setCurrentSet(1)
-          setTime(0)
-        } else {
-          // Workout complete
-          setIsActive(false)
-          setIsPaused(true)
-        }
-      }
-    }
-  }, [time, currentExercise, currentSet, currentExerciseData, totalSets, totalExercises])
+  }, [isActive, isPaused, duration])
 
   const handleStart = () => {
     setIsActive(true)
@@ -75,37 +51,15 @@ export default function WorkoutTimer() {
     setIsActive(false)
     setIsPaused(true)
     setTime(0)
-    setCurrentExercise(0)
-    setCurrentSet(1)
   }
 
-  const handleSkip = () => {
-    if (isRest) {
-      setTime(0)
-      if (currentSet < totalSets) {
-        setCurrentSet(currentSet + 1)
-      } else {
-        if (currentExercise < totalExercises - 1) {
-          setCurrentExercise(currentExercise + 1)
-          setCurrentSet(1)
-        } else {
-          // Workout complete
-          setIsActive(false)
-          setIsPaused(true)
-        }
-      }
-    } else {
-      setTime(currentExerciseData.duration) // Skip to rest
-    }
-  }
-
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`
   }
 
-  const remainingTime = currentDuration - time
+  const progress = (time / duration) * 100
 
   return (
     <Card className="w-full">
@@ -113,21 +67,43 @@ export default function WorkoutTimer() {
         <CardTitle className="text-xl">Workout Timer</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="text-center">
-          <h3 className="text-2xl font-bold">{isRest ? "Rest" : exercises[currentExercise].name}</h3>
-          <p className="text-muted-foreground">
-            Set {currentSet} of {totalSets} | Exercise {currentExercise + 1} of {totalExercises}
-          </p>
+        <div className="space-y-2">
+          <Label htmlFor="duration">Duration (seconds)</Label>
+          <Input
+            id="duration"
+            type="number"
+            value={duration}
+            onChange={(e) => {
+              const value = Number.parseInt(e.target.value)
+              if (!isNaN(value) && value > 0) {
+                setDuration(value)
+                if (time > value) {
+                  setTime(value)
+                }
+              }
+            }}
+            min={1}
+            disabled={isActive && !isPaused}
+          />
         </div>
 
-        <div className="flex justify-center">
-          <div className="text-4xl font-bold tabular-nums">{formatTime(remainingTime)}</div>
-        </div>
-
-        <Progress value={progress} className="h-3" />
-
-        <div className="text-center text-sm text-muted-foreground">
-          {isRest ? "Get ready for the next set" : "Keep pushing!"}
+        <div className="text-center my-8">
+          <motion.div
+            key={formatTime(time)}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className="text-5xl font-bold tabular-nums"
+          >
+            {formatTime(time)}
+          </motion.div>
+          <div className="mt-4 h-2 w-full bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-300 ease-linear"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">{formatTime(duration - time)} remaining</p>
         </div>
       </CardContent>
       <CardFooter className="flex justify-center gap-2">
@@ -142,9 +118,6 @@ export default function WorkoutTimer() {
         )}
         <Button variant="outline" onClick={handleReset} className="w-24">
           <RotateCcw className="mr-2 h-4 w-4" /> Reset
-        </Button>
-        <Button variant="secondary" onClick={handleSkip} className="w-24">
-          <SkipForward className="mr-2 h-4 w-4" /> Skip
         </Button>
       </CardFooter>
     </Card>
