@@ -15,11 +15,18 @@ export default function ProfilePage() {
   const [userName, setUserName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Check if user is logged in
+  // Check if user is logged in and has completed the quiz
   useEffect(() => {
     const user = localStorage.getItem("user")
+    const quizCompleted = localStorage.getItem("quizCompleted")
+
     if (!user) {
       router.push("/account")
+      return
+    }
+
+    if (!quizCompleted) {
+      router.push("/quiz")
       return
     }
 
@@ -29,6 +36,12 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("user")
+    localStorage.removeItem("quizCompleted")
+
+    // Also clear cookies
+    document.cookie = "user=; path=/; max-age=0"
+    document.cookie = "quizCompleted=; path=/; max-age=0"
+
     toast({
       title: "Signed out successfully",
       description: "You have been signed out of your account",
@@ -54,20 +67,57 @@ export default function ProfilePage() {
 
   // Simple rank system based on first letter of username
   const getRank = () => {
-    if (!userName) return { name: "Novice", color: "bg-zinc-400", progress: 10 }
+    if (!userName)
+      return {
+        name: "Novice",
+        color: "bg-zinc-400",
+        progress: 10,
+        badge: "bg-gradient-to-br from-zinc-300 to-zinc-500",
+        textColor: "text-zinc-800",
+      }
 
     const firstChar = userName.charAt(0).toLowerCase()
 
     if (firstChar >= "a" && firstChar <= "e") {
-      return { name: "Novice", color: "bg-zinc-400", progress: 10 }
+      return {
+        name: "Novice",
+        color: "bg-zinc-400",
+        progress: 10,
+        badge: "bg-gradient-to-br from-zinc-300 to-zinc-500",
+        textColor: "text-zinc-800",
+      }
     } else if (firstChar >= "f" && firstChar <= "j") {
-      return { name: "Apprentice", color: "bg-green-500", progress: 30 }
+      return {
+        name: "Apprentice",
+        color: "bg-green-500",
+        progress: 30,
+        badge: "bg-gradient-to-br from-green-400 to-green-600",
+        textColor: "text-green-800",
+      }
     } else if (firstChar >= "k" && firstChar <= "o") {
-      return { name: "Adept", color: "bg-blue-500", progress: 50 }
+      return {
+        name: "Adept",
+        color: "bg-blue-500",
+        progress: 50,
+        badge: "bg-gradient-to-br from-blue-400 to-blue-600",
+        textColor: "text-blue-800",
+      }
     } else if (firstChar >= "p" && firstChar <= "t") {
-      return { name: "Expert", color: "bg-purple-500", progress: 70 }
+      return {
+        name: "Expert",
+        color: "bg-purple-500",
+        progress: 70,
+        badge: "bg-gradient-to-br from-purple-400 to-purple-600",
+        textColor: "text-purple-800",
+      }
     } else {
-      return { name: "Master", color: "bg-amber-500", progress: 90 }
+      return {
+        name: "Master",
+        color: "bg-amber-500",
+        progress: 90,
+        badge: "bg-gradient-to-br from-amber-400 to-amber-600",
+        textColor: "text-amber-800",
+      }
     }
   }
 
@@ -140,15 +190,18 @@ export default function ProfilePage() {
             </motion.div>
 
             <motion.div variants={fadeIn} className="col-span-full md:col-span-1">
-              <Card>
+              <Card
+                className="border-t-4"
+                style={{ borderTopColor: `hsl(var(--${userRank.color.split("-")[1]}-500))` }}
+              >
                 <CardHeader>
                   <CardTitle>Profile Information</CardTitle>
                   <CardDescription>Your account details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-center mb-6">
-                    <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-primary">{userName?.charAt(0).toUpperCase()}</span>
+                    <div className={`h-24 w-24 rounded-full ${userRank.badge} flex items-center justify-center`}>
+                      <span className="text-3xl font-bold text-white">{userName?.charAt(0).toUpperCase()}</span>
                     </div>
                   </div>
 
@@ -176,7 +229,10 @@ export default function ProfilePage() {
             </motion.div>
 
             <motion.div variants={fadeIn} className="col-span-full md:col-span-1">
-              <Card>
+              <Card
+                className="border-t-4"
+                style={{ borderTopColor: `hsl(var(--${userRank.color.split("-")[1]}-500))` }}
+              >
                 <CardHeader>
                   <CardTitle>Your Rank</CardTitle>
                   <CardDescription>Current progress and achievements</CardDescription>
@@ -189,7 +245,7 @@ export default function ProfilePage() {
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
-                      <div className={`h-24 w-24 rounded-full flex items-center justify-center ${userRank.color}`}>
+                      <div className={`h-24 w-24 rounded-full flex items-center justify-center ${userRank.badge}`}>
                         <Trophy className="h-12 w-12 text-white" />
                       </div>
                       <div className="absolute -top-1 -right-1 bg-background rounded-full p-1">
@@ -201,16 +257,16 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="text-center">
-                    <h3 className="text-2xl font-bold">{userRank.name}</h3>
+                    <h3 className={`text-2xl font-bold ${userRank.textColor}`}>{userRank.name}</h3>
                     <p className="text-sm text-muted-foreground">Keep training to reach {nextRank}</p>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>{userRank.name}</span>
+                      <span className={userRank.textColor}>{userRank.name}</span>
                       <span>{nextRank}</span>
                     </div>
-                    <Progress value={userRank.progress} className="h-2" />
+                    <Progress value={userRank.progress} className={`h-2 ${userRank.color}`} />
                     <p className="text-xs text-center text-muted-foreground">
                       {100 - userRank.progress}% more progress needed for next rank
                     </p>
@@ -236,7 +292,10 @@ export default function ProfilePage() {
             </motion.div>
 
             <motion.div variants={fadeIn} className="col-span-full md:col-span-1">
-              <Card>
+              <Card
+                className="border-t-4"
+                style={{ borderTopColor: `hsl(var(--${userRank.color.split("-")[1]}-500))` }}
+              >
                 <CardHeader>
                   <CardTitle>Recent Achievements</CardTitle>
                   <CardDescription>Your latest accomplishments</CardDescription>
@@ -256,8 +315,10 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Trophy className="h-5 w-5 text-primary" />
+                      <div
+                        className={`h-10 w-10 rounded-full ${userRank.badge} flex items-center justify-center flex-shrink-0`}
+                      >
+                        <Trophy className="h-5 w-5 text-white" />
                       </div>
                       <div>
                         <h3 className="font-medium">Rank Assigned</h3>
@@ -290,7 +351,7 @@ export default function ProfilePage() {
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground md:text-right">
-            &copy; {new Date().getFullYear()} CalisthenicsPro. All rights reserved.
+            Made By Rohan Salem &copy; {new Date().getFullYear()}. All rights reserved.
           </p>
         </div>
       </footer>

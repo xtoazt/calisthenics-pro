@@ -183,7 +183,7 @@ export default function ProgramsPage() {
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground md:text-right">
-            Made By Rohan &copy; {new Date().getFullYear()}. All rights reserved.
+            Made By Rohan Salem &copy; {new Date().getFullYear()}. All rights reserved.
           </p>
         </div>
       </footer>

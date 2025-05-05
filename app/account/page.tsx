@@ -14,7 +14,6 @@ import { toast } from "@/components/ui/use-toast"
 
 export default function AccountPage() {
   const [name, setName] = useState("")
-  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -22,21 +21,39 @@ export default function AccountPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate sign-in process
+    // Simple validation
+    if (!name.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter your name to continue",
+        variant: "destructive",
+      })
+      setIsLoading(false)
+      return
+    }
+
+    // Store user name in localStorage
+    localStorage.setItem("user", name)
+
+    // Also set cookie for server-side middleware
+    document.cookie = `user=${name}; path=/; max-age=2592000` // 30 days
+
+    // Show success message
+    toast({
+      title: "Signed in successfully",
+      description: `Welcome, ${name}!`,
+    })
+
+    // Redirect to quiz if not completed, otherwise dashboard
+    const quizCompleted = localStorage.getItem("quizCompleted")
+
     setTimeout(() => {
       setIsLoading(false)
-
-      // Store user name in localStorage to simulate a simple auth state
-      localStorage.setItem("user", name)
-
-      // Show success message
-      toast({
-        title: "Signed in successfully",
-        description: `Welcome, ${name}!`,
-      })
-
-      // Redirect to dashboard
-      router.push("/dashboard")
+      if (quizCompleted) {
+        router.push("/dashboard")
+      } else {
+        router.push("/quiz")
+      }
     }, 1000)
   }
 
@@ -48,23 +65,6 @@ export default function AccountPage() {
             <Dumbbell className="h-6 w-6" />
             <span>CalisthenicsPro</span>
           </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/skills-overview" className="text-sm font-medium hover:underline underline-offset-4">
-              Skill Progressions
-            </Link>
-            <Link href="/exercises" className="text-sm font-medium hover:underline underline-offset-4">
-              Exercise Library
-            </Link>
-            <Link href="/programs" className="text-sm font-medium hover:underline underline-offset-4">
-              Programs
-            </Link>
-            <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4">
-              About
-            </Link>
-            <Link href="/account/profile" className="text-sm font-medium hover:underline underline-offset-4">
-              My Account
-            </Link>
-          </nav>
         </div>
       </header>
       <main className="flex-1 py-12 flex items-center justify-center">
@@ -73,7 +73,7 @@ export default function AccountPage() {
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
               <CardDescription className="text-center">
-                Enter your name and password to access your account
+                Enter your name to access your personalized training
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -88,28 +88,14 @@ export default function AccountPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? "Signing in..." : "Continue"}
                 </Button>
               </form>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <div className="text-sm text-center text-muted-foreground">
-                Don't have an account? Use any name and password for demo purposes.
-              </div>
-              <div className="text-xs text-center text-muted-foreground">
-                This is a demo application. No real authentication is implemented.
+                New to CalisthenicsPro? Just enter your name to get started.
               </div>
             </CardFooter>
           </Card>
@@ -127,7 +113,7 @@ export default function AccountPage() {
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground md:text-right">
-            &copy; {new Date().getFullYear()} CalisthenicsPro. All rights reserved.
+            Made By Rohan Salem &copy; {new Date().getFullYear()}. All rights reserved.
           </p>
         </div>
       </footer>

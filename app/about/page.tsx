@@ -229,7 +229,7 @@ export default function AboutPage() {
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground md:text-right">
-            &copy; {new Date().getFullYear()} CalisthenicsPro. All rights reserved.
+            Made By Rohan Salem &copy; {new Date().getFullYear()}. All rights reserved.
           </p>
         </div>
       </footer>

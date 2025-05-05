@@ -16,13 +16,55 @@ interface RankSystemProps {
 }
 
 const ranks = [
-  { name: "Novice", color: "bg-zinc-400", points: 0 },
-  { name: "Apprentice", color: "bg-green-500", points: 100 },
-  { name: "Adept", color: "bg-blue-500", points: 250 },
-  { name: "Expert", color: "bg-purple-500", points: 500 },
-  { name: "Master", color: "bg-amber-500", points: 1000 },
-  { name: "Grandmaster", color: "bg-red-500", points: 2000 },
-  { name: "Legend", color: "bg-gradient-to-r from-purple-500 to-pink-500", points: 5000 },
+  {
+    name: "Novice",
+    color: "bg-zinc-400",
+    points: 0,
+    badge: "bg-gradient-to-br from-zinc-300 to-zinc-500",
+    textColor: "text-zinc-800",
+  },
+  {
+    name: "Apprentice",
+    color: "bg-green-500",
+    points: 100,
+    badge: "bg-gradient-to-br from-green-400 to-green-600",
+    textColor: "text-green-800",
+  },
+  {
+    name: "Adept",
+    color: "bg-blue-500",
+    points: 250,
+    badge: "bg-gradient-to-br from-blue-400 to-blue-600",
+    textColor: "text-blue-800",
+  },
+  {
+    name: "Expert",
+    color: "bg-purple-500",
+    points: 500,
+    badge: "bg-gradient-to-br from-purple-400 to-purple-600",
+    textColor: "text-purple-800",
+  },
+  {
+    name: "Master",
+    color: "bg-amber-500",
+    points: 1000,
+    badge: "bg-gradient-to-br from-amber-400 to-amber-600",
+    textColor: "text-amber-800",
+  },
+  {
+    name: "Grandmaster",
+    color: "bg-red-500",
+    points: 2000,
+    badge: "bg-gradient-to-br from-red-400 to-red-600",
+    textColor: "text-red-800",
+  },
+  {
+    name: "Legend",
+    color: "bg-gradient-to-r from-purple-500 to-pink-500",
+    points: 5000,
+    badge: "bg-gradient-to-br from-purple-400 via-pink-500 to-amber-400",
+    textColor: "text-purple-800",
+  },
 ]
 
 export default function RankSystem({
@@ -36,7 +78,7 @@ export default function RankSystem({
   const nextRankData = ranks.find((r) => r.name === nextRank) || ranks[1]
 
   return (
-    <Card>
+    <Card className="border-t-4" style={{ borderTopColor: `hsl(var(--${currentRankData.color.split("-")[1]}-500))` }}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Your Rank</CardTitle>
@@ -65,7 +107,7 @@ export default function RankSystem({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <div className={`h-24 w-24 rounded-full flex items-center justify-center ${currentRankData.color}`}>
+            <div className={`h-24 w-24 rounded-full flex items-center justify-center ${currentRankData.badge}`}>
               <Trophy className="h-12 w-12 text-white" />
             </div>
             <div className="absolute -top-1 -right-1 bg-background rounded-full p-1">
@@ -77,7 +119,7 @@ export default function RankSystem({
         </div>
 
         <div className="text-center">
-          <h3 className="text-2xl font-bold">{currentRank}</h3>
+          <h3 className={`text-2xl font-bold ${currentRankData.textColor}`}>{currentRank}</h3>
           <p className="text-sm text-muted-foreground">
             {currentPoints} / {pointsToNextRank} points
           </p>
@@ -85,10 +127,10 @@ export default function RankSystem({
 
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>{currentRank}</span>
-            <span>{nextRank}</span>
+            <span className={currentRankData.textColor}>{currentRank}</span>
+            <span className={nextRankData.textColor}>{nextRank}</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className={`h-2 ${currentRankData.color}`} />
           <p className="text-xs text-center text-muted-foreground">
             {pointsToNextRank - currentPoints} points needed for next rank
           </p>
