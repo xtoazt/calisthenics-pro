@@ -1,54 +1,12 @@
 // Rank definitions
 export const ranks = [
-  {
-    name: "Novice",
-    color: "bg-zinc-400",
-    minPoints: 0,
-    badge: "bg-gradient-to-br from-zinc-300 to-zinc-500",
-    textColor: "text-zinc-800",
-  },
-  {
-    name: "Apprentice",
-    color: "bg-green-500",
-    minPoints: 100,
-    badge: "bg-gradient-to-br from-green-400 to-green-600",
-    textColor: "text-green-800",
-  },
-  {
-    name: "Adept",
-    color: "bg-blue-500",
-    minPoints: 250,
-    badge: "bg-gradient-to-br from-blue-400 to-blue-600",
-    textColor: "text-blue-800",
-  },
-  {
-    name: "Expert",
-    color: "bg-purple-500",
-    minPoints: 500,
-    badge: "bg-gradient-to-br from-purple-400 to-purple-600",
-    textColor: "text-purple-800",
-  },
-  {
-    name: "Master",
-    color: "bg-amber-500",
-    minPoints: 1000,
-    badge: "bg-gradient-to-br from-amber-400 to-amber-600",
-    textColor: "text-amber-800",
-  },
-  {
-    name: "Grandmaster",
-    color: "bg-red-500",
-    minPoints: 2000,
-    badge: "bg-gradient-to-br from-red-400 to-red-600",
-    textColor: "text-red-800",
-  },
-  {
-    name: "Legend",
-    color: "bg-gradient-to-r from-purple-500 to-pink-500",
-    minPoints: 5000,
-    badge: "bg-gradient-to-br from-purple-400 via-pink-500 to-amber-400",
-    textColor: "text-purple-800",
-  },
+  { name: "Novice", minPoints: 0, color: "text-gray-500" },
+  { name: "Beginner", minPoints: 100, color: "text-green-500" },
+  { name: "Intermediate", minPoints: 500, color: "text-blue-500" },
+  { name: "Advanced", minPoints: 1000, color: "text-purple-500" },
+  { name: "Expert", minPoints: 2500, color: "text-orange-500" },
+  { name: "Master", minPoints: 5000, color: "text-red-500" },
+  { name: "Elite", minPoints: 10000, color: "text-yellow-500" },
 ]
 
 // Calculate user points based on name and experience

@@ -7,6 +7,7 @@ import { ArrowRight, Dumbbell, Award, Users } from "lucide-react"
 import { motion } from "framer-motion"
 import HomeDashboard from "./components/home-dashboard"
 import { calculateUserPoints } from "@/lib/user-utils"
+import { recordActivity } from "@/lib/workout-utils"
 
 export default function Home() {
   const [quizCompleted, setQuizCompleted] = useState(false)
@@ -32,6 +33,12 @@ export default function Home() {
       // Calculate user points
       const points = calculateUserPoints(user, experience)
       setUserPoints(points)
+
+      // Record home page visit for logged in users (awards 5 points)
+      recordActivity("visit", "Visited home page", 5)
+    } else {
+      // Record landing page visit for new users (awards 2 points)
+      recordActivity("visit", "Visited landing page", 2)
     }
 
     setLoading(false)
@@ -69,24 +76,48 @@ export default function Home() {
       <div className="flex flex-col min-h-screen">
         <header className="border-b">
           <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-bold text-xl"
+              onClick={() => recordActivity("navigation", "Clicked home logo", 1)}
+            >
               <Dumbbell className="h-6 w-6" />
               <span>CalisthenicsPro</span>
             </Link>
             <nav className="hidden md:flex gap-6">
-              <Link href="/skills" className="text-sm font-medium hover:underline underline-offset-4">
+              <Link
+                href="/skills"
+                className="text-sm font-medium hover:underline underline-offset-4"
+                onClick={() => recordActivity("navigation", "Navigated to skills from home", 2)}
+              >
                 Skill Progressions
               </Link>
-              <Link href="/exercises" className="text-sm font-medium hover:underline underline-offset-4">
+              <Link
+                href="/exercises"
+                className="text-sm font-medium hover:underline underline-offset-4"
+                onClick={() => recordActivity("navigation", "Navigated to exercises from home", 2)}
+              >
                 Exercise Library
               </Link>
-              <Link href="/programs" className="text-sm font-medium hover:underline underline-offset-4">
+              <Link
+                href="/programs"
+                className="text-sm font-medium hover:underline underline-offset-4"
+                onClick={() => recordActivity("navigation", "Navigated to programs from home", 2)}
+              >
                 Programs
               </Link>
-              <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4">
+              <Link
+                href="/about"
+                className="text-sm font-medium hover:underline underline-offset-4"
+                onClick={() => recordActivity("navigation", "Navigated to about from home", 2)}
+              >
                 About
               </Link>
-              <Link href="/account/profile" className="text-sm font-medium hover:underline underline-offset-4">
+              <Link
+                href="/account/profile"
+                className="text-sm font-medium hover:underline underline-offset-4"
+                onClick={() => recordActivity("navigation", "Navigated to profile from home", 2)}
+              >
                 My Account
               </Link>
             </nav>
@@ -132,7 +163,7 @@ export default function Home() {
             <span>CalisthenicsPro</span>
           </div>
           <div className="flex gap-4">
-            <Link href="/quiz">
+            <Link href="/quiz" onClick={() => recordActivity("navigation", "Started quiz from landing page", 5)}>
               <Button>
                 Take the Quiz <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -156,7 +187,7 @@ export default function Home() {
                   advanced, we'll guide you through every step of your journey.
                 </p>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/quiz">
+                  <Link href="/quiz" onClick={() => recordActivity("navigation", "Started quiz from hero section", 5)}>
                     <Button size="lg" className="gap-1">
                       Take the Quiz <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -261,7 +292,10 @@ export default function Home() {
                   available equipment.
                 </p>
               </div>
-              <Link href="/quiz">
+              <Link
+                href="/quiz"
+                onClick={() => recordActivity("navigation", "Started quiz from personalized section", 5)}
+              >
                 <Button size="lg" className="mt-4">
                   Start Your Journey
                 </Button>

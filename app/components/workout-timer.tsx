@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Play, Pause, RotateCcw, Clock, Save } from "lucide-react"
+import { Play, Pause, RotateCcw, Save } from "lucide-react"
+import { motion } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
+import { recordActivity } from "@/lib/workout-utils"
 
 interface WorkoutTimerProps {
   onTimeUpdate?: (time: number) => void
@@ -14,160 +16,214 @@ interface WorkoutTimerProps {
 export default function WorkoutTimer({ onTimeUpdate, onSave }: WorkoutTimerProps) {
   const [time, setTime] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
-  const [emoji, setEmoji] = useState("⏱️")
-  const [savedTimes, setSavedTimes] = useState<number[]>([])
+  const [lastMilestone, setLastMilestone] = useState(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Start or pause the timer
-  const toggleTimer = useCallback(() => {
-    setIsRunning((prev) => !prev)
+  // Load saved time from localStorage
+  useEffect(() => {
+    const savedTime = localStorage.getItem("workoutTime")
+    if (savedTime) {
+      setTime(Number.parseInt(savedTime))
+    }
+
+    // Record opening the timer (awards 5 points)
+    recordActivity("tool", "Opened workout timer", 5)
   }, [])
 
+  // Save time to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("workoutTime", time.toString())
+
+    // Call the onTimeUpdate callback if provided
+    if (onTimeUpdate) {
+      onTimeUpdate(time)
+    }
+
+    // Check for milestones (every 5 minutes)
+    const minutes = Math.floor(time / 60)
+    if (minutes > 0 && minutes % 5 === 0 && minutes !== lastMilestone) {
+      setLastMilestone(minutes)
+
+      // Award points for workout duration milestones
+      const points = 10
+      recordActivity("workout_milestone", `Reached ${minutes} minute workout milestone`, points)
+
+      toast({
+        title: `${minutes} Minute Milestone!`,
+        description: `You've been working out for ${minutes} minutes! +${points} points`,
+      })
+    }
+  }, [time, onTimeUpdate, lastMilestone])
+
+  // Start/stop the timer
+  const toggleTimer = () => {
+    if (isRunning) {
+      // Stop the timer
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      setIsRunning(false)
+
+      // Record pausing the timer (awards 2 points)
+      recordActivity("interaction", "Paused workout timer", 2)
+    } else {
+      // Start the timer
+      setIsRunning(true)
+      const startTime = Date.now() - time * 1000
+      intervalRef.current = setInterval(() => {
+        setTime(Math.floor((Date.now() - startTime) / 1000))
+      }, 1000)
+
+      // Record starting the timer (awards 5 points)
+      recordActivity("interaction", "Started workout timer", 5)
+    }
+  }
+
   // Reset the timer
-  const resetTimer = useCallback(() => {
+  const resetTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
     setIsRunning(false)
     setTime(0)
-    setEmoji("⏱️")
-    if (onTimeUpdate) {
-      onTimeUpdate(0)
-    }
-  }, [onTimeUpdate])
+    setLastMilestone(0)
+
+    // Record resetting the timer (awards 2 points)
+    recordActivity("interaction", "Reset workout timer", 2)
+  }
 
   // Save the current time
-  const saveTime = useCallback(() => {
+  const saveTime = () => {
     if (time > 0) {
-      setSavedTimes((prev) => [...prev, time])
-
+      // Call the onSave callback if provided
       if (onSave) {
         onSave(time)
       }
 
+      // Record saving the time (awards 10 points)
+      recordActivity("workout", "Saved workout time", 10)
+
       toast({
-        title: "Time saved",
-        description: `Saved time: ${formatTime(time)}`,
+        title: "Time Saved",
+        description: `Workout time saved: ${formatTime(time)}`,
+      })
+    } else {
+      toast({
+        title: "No Time to Save",
+        description: "Start the timer first to track your workout time.",
+        variant: "destructive",
       })
     }
-  }, [time, onSave])
+  }
 
-  // Format time as MM:SS
-  const formatTime = useCallback((timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60)
-    const seconds = timeInSeconds % 60
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-  }, [])
+  // Format time as HH:MM:SS
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
 
-  // Update emoji based on time
+    return [
+      hours > 0 ? hours.toString().padStart(2, "0") : null,
+      minutes.toString().padStart(2, "0"),
+      secs.toString().padStart(2, "0"),
+    ]
+      .filter(Boolean)
+      .join(":")
+  }
+
+  // Clean up interval on unmount
   useEffect(() => {
-    if (time < 60) {
-      setEmoji("⏱️")
-    } else if (time < 300) {
-      setEmoji("🏃")
-    } else if (time < 600) {
-      setEmoji("💪")
-    } else if (time < 1200) {
-      setEmoji("🔥")
-    } else {
-      setEmoji("🏆")
-    }
-
-    // Pass time to parent component if callback provided
-    if (onTimeUpdate) {
-      onTimeUpdate(time)
-    }
-  }, [time, onTimeUpdate])
-
-  // Handle timer logic
-  useEffect(() => {
-    if (isRunning) {
-      intervalRef.current = setInterval(() => {
-        setTime((prevTime) => prevTime + 1)
-      }, 1000)
-    } else if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-    }
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
       }
     }
-  }, [isRunning])
-
-  // Load saved times from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedTimesJSON = localStorage.getItem("savedTimes")
-      if (savedTimesJSON) {
-        const parsed = JSON.parse(savedTimesJSON)
-        if (Array.isArray(parsed)) {
-          setSavedTimes(parsed)
-        }
-      }
-    } catch (error) {
-      console.error("Error loading saved times:", error)
-    }
   }, [])
 
-  // Save times to localStorage when they change
-  useEffect(() => {
-    try {
-      localStorage.setItem("savedTimes", JSON.stringify(savedTimes))
-    } catch (error) {
-      console.error("Error saving times to localStorage:", error)
-    }
-  }, [savedTimes])
+  // Get color based on time
+  const getTimeColor = () => {
+    const minutes = Math.floor(time / 60)
+    if (minutes < 5) return "text-zinc-800"
+    if (minutes < 15) return "text-green-800"
+    if (minutes < 30) return "text-blue-800"
+    if (minutes < 45) return "text-purple-800"
+    return "text-amber-800"
+  }
+
+  // Get background color based on time
+  const getTimeBg = () => {
+    const minutes = Math.floor(time / 60)
+    if (minutes < 5) return "bg-zinc-100"
+    if (minutes < 15) return "bg-green-100"
+    if (minutes < 30) return "bg-blue-100"
+    if (minutes < 45) return "bg-purple-100"
+    return "bg-amber-100"
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" /> Workout Timer
-        </CardTitle>
-        <CardDescription>Track the duration of your workout</CardDescription>
+        <CardTitle>Workout Timer</CardTitle>
+        <CardDescription>Track your workout duration</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center py-6">
-        <div className="text-6xl mb-4">{emoji}</div>
-        <div className="text-6xl font-bold tabular-nums">{formatTime(time)}</div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {time < 60
-            ? "Let's get started!"
-            : time < 300
-              ? "Warming up nicely!"
-              : time < 600
-                ? "Keep pushing!"
-                : time < 1200
-                  ? "You're on fire!"
-                  : "Amazing endurance!"}
-        </p>
-
-        {savedTimes.length > 0 && (
-          <div className="mt-6 w-full">
-            <h3 className="text-sm font-medium mb-2">Saved Times</h3>
-            <div className="flex flex-wrap gap-2">
-              {savedTimes.map((savedTime, index) => (
-                <div key={index} className="px-3 py-1 rounded-full text-sm font-medium bg-primary/10">
-                  {index + 1}: {formatTime(savedTime)}
-                </div>
-              ))}
+      <CardContent className="flex flex-col items-center">
+        <motion.div
+          className={`flex items-center justify-center w-48 h-48 rounded-full mb-6 ${getTimeBg()}`}
+          animate={{ scale: isRunning ? [1, 1.03, 1] : 1 }}
+          transition={{ duration: 1, repeat: isRunning ? Number.POSITIVE_INFINITY : 0, ease: "easeInOut" }}
+        >
+          <div className="flex flex-col items-center">
+            <span className={`text-4xl font-bold ${getTimeColor()} tabular-nums`}>{formatTime(time)}</span>
+            <div className="text-xl mt-2">
+              {Math.floor(time / 60) < 5
+                ? "Just Started"
+                : Math.floor(time / 60) < 15
+                  ? "Warming Up"
+                  : Math.floor(time / 60) < 30
+                    ? "In the Zone"
+                    : Math.floor(time / 60) < 45
+                      ? "Pushing Hard"
+                      : "Beast Mode"}
             </div>
           </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={resetTimer} disabled={time === 0}>
-            <RotateCcw className="mr-2 h-4 w-4" /> Reset
-          </Button>
+        </motion.div>
 
-          <Button variant="outline" onClick={saveTime} disabled={time === 0}>
-            <Save className="mr-2 h-4 w-4" /> Save
+        <div className="grid grid-cols-3 gap-4 w-full max-w-xs">
+          <Button
+            variant={isRunning ? "destructive" : "default"}
+            size="lg"
+            onClick={toggleTimer}
+            className="flex items-center gap-2"
+          >
+            {isRunning ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            {isRunning ? "Pause" : "Start"}
+          </Button>
+          <Button variant="outline" size="lg" onClick={resetTimer} className="flex items-center gap-2">
+            <RotateCcw className="h-5 w-5" />
+            Reset
+          </Button>
+          <Button variant="outline" size="lg" onClick={saveTime} className="flex items-center gap-2">
+            <Save className="h-5 w-5" />
+            Save
           </Button>
         </div>
 
-        <Button onClick={toggleTimer}>
-          {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-          {isRunning ? "Pause" : "Start"}
-        </Button>
+        <div className="mt-6 w-full">
+          <div className="text-sm text-muted-foreground">
+            <p>
+              <strong>Pro Tip:</strong> Earn points for every 5 minutes of workout time! Keep the timer running during
+              your workout to track your progress and earn more points.
+            </p>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <div className="text-sm text-muted-foreground">{isRunning ? "Timer is running" : "Timer is paused"}</div>
+        <div className="text-sm font-medium">
+          {Math.floor(time / 60)} min {time % 60} sec
+        </div>
       </CardFooter>
     </Card>
   )

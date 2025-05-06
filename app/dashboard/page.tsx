@@ -27,6 +27,7 @@ import { motion } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
 import Leaderboard from "../components/leaderboard"
 import RankUpNotification from "../components/rank-up-notification"
+import DailyBonus from "../components/daily-bonus"
 import {
   getUserRank,
   getNextRank,
@@ -43,6 +44,7 @@ import {
   getCompletedSkillCount,
   getTotalExerciseCount,
   initializeUserData,
+  recordActivity,
 } from "@/lib/workout-utils"
 import {
   Dialog,
@@ -131,6 +133,9 @@ export default function DashboardPage() {
         skills: getCompletedSkillCount(),
       })
 
+      // Record dashboard visit (awards 5 points)
+      recordActivity("visit", "Visited dashboard", 5)
+
       setLoading(false)
     } catch (err) {
       console.error("Error loading user data:", err)
@@ -175,6 +180,9 @@ export default function DashboardPage() {
   }
 
   const handleStartWorkout = (workout: any) => {
+    // Record starting a workout (awards 10 points)
+    recordActivity("workout", `Started ${workout.title}`, 10)
+
     setSelectedWorkout(workout)
     setWorkoutDialogOpen(true)
     setWorkoutDuration(0)
@@ -253,15 +261,29 @@ export default function DashboardPage() {
 
   const handleTimeUpdate = (time: number) => {
     setWorkoutDuration(time)
+
+    // Award points for every minute of workout time (1 point per minute)
+    if (time % 60 === 0 && time > 0) {
+      recordActivity("workout_time", "Workout time milestone", 1)
+    }
   }
 
   const handleSaveTime = (time: number) => {
     if (time > 0) {
+      // Record saving workout time (awards 5 points)
+      recordActivity("save", "Saved workout time", 5)
+
       toast({
         title: "Time saved",
         description: `Workout time saved: ${Math.floor(time / 60)} minutes and ${time % 60} seconds`,
       })
     }
+  }
+
+  const handleTabChange = (value: string) => {
+    // Record tab change (awards 2 points)
+    recordActivity("navigation", `Switched to ${value} tab`, 2)
+    setActiveTab(value)
   }
 
   const fadeIn = {
@@ -312,29 +334,63 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-screen">
       <header className="border-b">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-bold text-xl"
+            onClick={() => recordActivity("navigation", "Navigated to home", 2)}
+          >
             <Dumbbell className="h-6 w-6" />
             <span>CalisthenicsPro</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link href="/skills" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/skills"
+              className="text-sm font-medium hover:underline underline-offset-4"
+              onClick={() => recordActivity("navigation", "Navigated to skills", 2)}
+            >
               Skill Progressions
             </Link>
-            <Link href="/exercises" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/exercises"
+              className="text-sm font-medium hover:underline underline-offset-4"
+              onClick={() => recordActivity("navigation", "Navigated to exercises", 2)}
+            >
               Exercise Library
             </Link>
-            <Link href="/programs" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/programs"
+              className="text-sm font-medium hover:underline underline-offset-4"
+              onClick={() => recordActivity("navigation", "Navigated to programs", 2)}
+            >
               Programs
             </Link>
-            <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/about"
+              className="text-sm font-medium hover:underline underline-offset-4"
+              onClick={() => recordActivity("navigation", "Navigated to about", 2)}
+            >
               About
             </Link>
-            <Link href="/account/profile" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="/account/profile"
+              className="text-sm font-medium hover:underline underline-offset-4"
+              onClick={() => recordActivity("navigation", "Navigated to profile", 2)}
+            >
               My Account
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                recordActivity("interaction", "Opened settings", 3)
+                toast({
+                  title: "Settings",
+                  description: "Settings feature coming soon!",
+                })
+              }}
+            >
               <Settings className="h-5 w-5" />
               <span className="sr-only">Settings</span>
             </Button>
@@ -383,6 +439,13 @@ export default function DashboardPage() {
                     <li>Count your reps with the rep counter tool</li>
                     <li>Mark workouts as complete to earn points and rank up</li>
                   </ol>
+                  <div className="bg-amber-100 p-3 rounded-md border border-amber-300">
+                    <p className="text-amber-800 font-medium">Pro Tip: Earn Points with Every Action!</p>
+                    <p className="text-sm text-amber-700">
+                      Every activity you perform on the platform earns you points toward your next rank. Try different
+                      features, complete workouts, and track your progress to rank up faster!
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -415,7 +478,11 @@ export default function DashboardPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Link href="/account/profile" className="w-full">
+                  <Link
+                    href="/account/profile"
+                    className="w-full"
+                    onClick={() => recordActivity("navigation", "Viewed profile from rank card", 3)}
+                  >
                     <Button variant="outline" className="w-full">
                       View Profile
                     </Button>
@@ -448,7 +515,17 @@ export default function DashboardPage() {
                       <span className="text-2xl font-bold">{stats.exercises}</span>
                       <span className="text-sm text-muted-foreground">Exercises</span>
                     </div>
-                    <div className="flex flex-col items-center p-4 rounded-lg bg-primary/10">
+                    <div
+                      className="flex flex-col items-center p-4 rounded-lg bg-primary/10 cursor-pointer"
+                      onClick={() => {
+                        recordActivity("interaction", "Viewed points details", 2)
+                        toast({
+                          title: "Points System",
+                          description:
+                            "Every activity earns you points! Complete workouts, view skills, and interact with the app to rank up.",
+                        })
+                      }}
+                    >
                       <Settings className="h-8 w-8 text-primary mb-2" />
                       <span className="text-2xl font-bold">{userPoints}</span>
                       <span className="text-sm text-muted-foreground">Points</span>
@@ -459,7 +536,7 @@ export default function DashboardPage() {
             </motion.div>
 
             <motion.div variants={fadeIn} className="col-span-full">
-              <Tabs defaultValue="workouts" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+              <Tabs defaultValue="workouts" className="w-full" value={activeTab} onValueChange={handleTabChange}>
                 <TabsList className="grid grid-cols-4 w-full">
                   <TabsTrigger value="workouts" className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" /> Workouts
@@ -492,7 +569,6 @@ export default function DashboardPage() {
                           <motion.div
                             key={index}
                             whileHover={{ scale: 1.03, y: -5 }}
-                            transition={{ type: "spring", stiffness: 400, scale: 1.03, y: -5 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                           >
                             <Card className={`overflow-hidden ${isCompleted ? "border-green-500" : ""}`}>
@@ -545,7 +621,18 @@ export default function DashboardPage() {
 
                   <TabsContent value="counter" className="mt-6">
                     <div className="max-w-md mx-auto">
-                      <RepCounter />
+                      <RepCounter
+                        onMilestone={(count) => {
+                          // Award points for rep milestones (10 points per 50 reps)
+                          if (count % 50 === 0 && count > 0) {
+                            recordActivity("milestone", `Reached ${count} reps`, 10)
+                            toast({
+                              title: "Rep Milestone!",
+                              description: `You've reached ${count} reps! +10 points`,
+                            })
+                          }
+                        }}
+                      />
                     </div>
                   </TabsContent>
 
@@ -589,7 +676,17 @@ export default function DashboardPage() {
                   </CardContent>
                   {completedWorkouts.length > 5 && (
                     <CardFooter>
-                      <Button variant="outline" className="w-full">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          recordActivity("view", "Viewed all completed workouts", 5)
+                          toast({
+                            title: "Coming Soon",
+                            description: "Detailed workout history will be available soon!",
+                          })
+                        }}
+                      >
                         View All Completed Workouts
                       </Button>
                     </CardFooter>
@@ -611,7 +708,11 @@ export default function DashboardPage() {
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-3">
                       {recommendedSkills.map((skill, index) => (
-                        <Link key={index} href={`/skills/${skill.slug}`}>
+                        <Link
+                          key={index}
+                          href={`/skills/${skill.slug}`}
+                          onClick={() => recordActivity("navigation", `Viewed ${skill.name} skill`, 3)}
+                        >
                           <Card className="h-full hover:bg-muted/50 transition-colors cursor-pointer">
                             <CardHeader className="p-4">
                               <CardTitle className="text-base">{skill.name}</CardTitle>
@@ -636,7 +737,11 @@ export default function DashboardPage() {
       <footer className="border-t py-6 md:py-8">
         <div className="container flex flex-col items-center justify-between gap-4 md:flex-row px-4 md:px-6">
           <div className="flex flex-col items-center gap-4 md:items-start md:gap-2">
-            <Link href="/" className="flex items-center gap-2 text-lg font-bold">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-lg font-bold"
+              onClick={() => recordActivity("navigation", "Navigated to home from footer", 1)}
+            >
               <Dumbbell className="h-6 w-6" />
               <span>CalisthenicsPro</span>
             </Link>
@@ -684,7 +789,17 @@ export default function DashboardPage() {
           )}
 
           <DialogFooter className="flex flex-col sm:flex-row sm:justify-between">
-            <Button type="button" variant="outline" onClick={() => setWorkoutDialogOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setWorkoutDialogOpen(false)
+                if (workoutCompleted) {
+                  // Record closing completed workout dialog (awards 2 points)
+                  recordActivity("interaction", "Closed completed workout dialog", 2)
+                }
+              }}
+            >
               {workoutCompleted ? "Close" : "Cancel"}
             </Button>
 
@@ -701,6 +816,9 @@ export default function DashboardPage() {
       {rankUpNotification && (
         <RankUpNotification rankName={rankUpNotification} onClose={() => setRankUpNotification(null)} />
       )}
+
+      {/* Daily Bonus */}
+      <DailyBonus />
     </div>
   )
 }

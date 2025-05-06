@@ -1,4 +1,6 @@
 // Workout completion utilities
+import { ranks } from "./user-utils"
+import { toast } from "@/components/ui/use-toast"
 
 // Save completed workout to localStorage with validation
 export function saveCompletedWorkout(workoutId: string, workoutTitle: string, duration: number) {
@@ -111,7 +113,6 @@ export function updateTotalPoints(points: number) {
     document.cookie = `userPoints=${newTotal}; path=/; max-age=2592000` // 30 days
 
     // Display rank up notification if user has reached a new rank
-    const { ranks } = require("./user-utils")
     const oldRank = getRankFromPoints(currentPoints)
     const newRank = getRankFromPoints(newTotal)
 
@@ -119,7 +120,6 @@ export function updateTotalPoints(points: number) {
       // User has ranked up!
       setTimeout(() => {
         try {
-          const toast = require("@/components/ui/use-toast").toast
           toast({
             title: "🎉 Rank Up!",
             description: `Congratulations! You've reached the rank of ${newRank.name}!`,
@@ -141,8 +141,6 @@ export function updateTotalPoints(points: number) {
 
 // Helper function to get rank from points
 function getRankFromPoints(points: number) {
-  const { ranks } = require("./user-utils")
-
   // Find the highest rank the user qualifies for
   for (let i = ranks.length - 1; i >= 0; i--) {
     if (points >= ranks[i].minPoints) {
@@ -302,7 +300,88 @@ export function getCompletedWorkoutCount() {
 export function getTotalExerciseCount() {
   const workouts = getCompletedWorkouts()
   // Estimate 5 exercises per workout
-  return workouts.lengthth * 5
+  return workouts.length * 5
+}
+
+// Record any activity and award points
+export function recordActivity(activityType: string, activityName: string, points = 10) {
+  try {
+    // Validate inputs
+    if (!activityType || !activityName) {
+      console.error("Invalid activity data: Missing type or name")
+      return null
+    }
+
+    // Ensure points is a positive number
+    const validPoints = Math.max(1, points || 10)
+
+    // Get existing activities
+    const activitiesJSON = localStorage.getItem("userActivities")
+    let activities = []
+
+    try {
+      activities = activitiesJSON ? JSON.parse(activitiesJSON) : []
+      // Validate that it's an array
+      if (!Array.isArray(activities)) {
+        activities = []
+      }
+    } catch (e) {
+      console.error("Error parsing activities:", e)
+      activities = []
+    }
+
+    // Add new activity
+    const newActivity = {
+      type: activityType,
+      name: activityName,
+      completedAt: new Date().toISOString(),
+      points: validPoints,
+    }
+
+    activities.push(newActivity)
+
+    // Save back to localStorage
+    localStorage.setItem("userActivities", JSON.stringify(activities))
+
+    // Update total points
+    updateTotalPoints(validPoints)
+
+    // Show points notification
+    if (typeof window !== "undefined" && validPoints > 0) {
+      // Only show notification for significant point gains (5+)
+      if (validPoints >= 5) {
+        try {
+          toast({
+            title: `+${validPoints} Points!`,
+            description: activityName,
+            variant: "default",
+            duration: 3000,
+          })
+        } catch (e) {
+          console.error("Could not show points notification:", e)
+        }
+      }
+    }
+
+    return newActivity
+  } catch (error) {
+    console.error("Error recording activity:", error)
+    return null
+  }
+}
+
+// Get all activities with error handling
+export function getActivities() {
+  try {
+    const activitiesJSON = localStorage.getItem("userActivities")
+    if (!activitiesJSON) return []
+
+    const activities = JSON.parse(activitiesJSON)
+    return Array.isArray(activities) ? activities : []
+  } catch (error) {
+    console.error("Error getting activities:", error)
+    return []
+  }
 }
 
 // Initialize user data if not already present
@@ -327,6 +406,11 @@ export function initializeUserData() {
       localStorage.setItem("completedSkills", "[]")
     }
 
+    // Initialize activities if not present
+    if (!localStorage.getItem("userActivities")) {
+      localStorage.setItem("userActivities", "[]")
+    }
+
     return true
   } catch (error) {
     console.error("Error initializing user data:", error)
@@ -340,6 +424,7 @@ export function resetUserProgress() {
     localStorage.removeItem("userPoints")
     localStorage.removeItem("completedWorkouts")
     localStorage.removeItem("completedSkills")
+    localStorage.removeItem("userActivities")
 
     // Reset cookies
     document.cookie = "userPoints=0; path=/; max-age=2592000"
