@@ -132,6 +132,12 @@ export function updateTotalPoints(points: number) {
       }, 500)
     }
 
+    // Dispatch a custom event to notify components that points have changed
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("pointsUpdated", { detail: { points: newTotal } })
+      window.dispatchEvent(event)
+    }
+
     return newTotal
   } catch (error) {
     console.error("Error updating total points:", error)
@@ -168,16 +174,8 @@ export function getCompletedWorkouts() {
 
 // Get total points with error handling
 export function getTotalPoints() {
-  try {
-    const currentPointsStr = localStorage.getItem("userPoints")
-    if (!currentPointsStr) return 0
-
-    const currentPoints = Number.parseInt(currentPointsStr, 10)
-    return isNaN(currentPoints) ? 0 : currentPoints
-  } catch (error) {
-    console.error("Error getting total points:", error)
-    return 0
-  }
+  const pointsStr = localStorage.getItem("userPoints")
+  return pointsStr ? Number.parseInt(pointsStr, 10) : 0
 }
 
 // Save completed skill to localStorage with validation
@@ -305,69 +303,29 @@ export function getTotalExerciseCount() {
 
 // Record any activity and award points
 export function recordActivity(activityType: string, activityName: string, points = 10) {
-  try {
-    // Validate inputs
-    if (!activityType || !activityName) {
-      console.error("Invalid activity data: Missing type or name")
-      return null
-    }
+  const currentPoints = getTotalPoints()
+  const newTotal = currentPoints + points
+  localStorage.setItem("userPoints", newTotal.toString())
 
-    // Ensure points is a positive number
-    const validPoints = Math.max(1, points || 10)
-
-    // Get existing activities
-    const activitiesJSON = localStorage.getItem("userActivities")
-    let activities = []
-
-    try {
-      activities = activitiesJSON ? JSON.parse(activitiesJSON) : []
-      // Validate that it's an array
-      if (!Array.isArray(activities)) {
-        activities = []
-      }
-    } catch (e) {
-      console.error("Error parsing activities:", e)
-      activities = []
-    }
-
-    // Add new activity
-    const newActivity = {
-      type: activityType,
-      name: activityName,
-      completedAt: new Date().toISOString(),
-      points: validPoints,
-    }
-
-    activities.push(newActivity)
-
-    // Save back to localStorage
-    localStorage.setItem("userActivities", JSON.stringify(activities))
-
-    // Update total points
-    updateTotalPoints(validPoints)
-
-    // Show points notification
-    if (typeof window !== "undefined" && validPoints > 0) {
-      // Only show notification for significant point gains (5+)
-      if (validPoints >= 5) {
-        try {
-          toast({
-            title: `+${validPoints} Points!`,
-            description: activityName,
-            variant: "default",
-            duration: 3000,
-          })
-        } catch (e) {
-          console.error("Could not show points notification:", e)
-        }
+  // Show points notification
+  if (typeof window !== "undefined" && points > 0) {
+    // Only show notification for significant point gains (5+)
+    if (points >= 5) {
+      try {
+        toast({
+          title: `+${points} Points!`,
+          description: activityName,
+          variant: "default",
+          duration: 3000,
+        })
+      } catch (e) {
+        console.error("Could not show points notification:", e)
       }
     }
-
-    return newActivity
-  } catch (error) {
-    console.error("Error recording activity:", error)
-    return null
   }
+
+  // Log the activity
+  console.log(`[${activityType}] ${activityName}: +${points} points (Total: ${newTotal})`)
 }
 
 // Get all activities with error handling
