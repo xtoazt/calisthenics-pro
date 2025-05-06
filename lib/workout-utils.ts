@@ -110,11 +110,48 @@ export function updateTotalPoints(points: number) {
     // Also update in cookies for server-side access
     document.cookie = `userPoints=${newTotal}; path=/; max-age=2592000` // 30 days
 
+    // Display rank up notification if user has reached a new rank
+    const { ranks } = require("./user-utils")
+    const oldRank = getRankFromPoints(currentPoints)
+    const newRank = getRankFromPoints(newTotal)
+
+    if (oldRank.name !== newRank.name) {
+      // User has ranked up!
+      setTimeout(() => {
+        try {
+          const toast = require("@/components/ui/use-toast").toast
+          toast({
+            title: "🎉 Rank Up!",
+            description: `Congratulations! You've reached the rank of ${newRank.name}!`,
+            variant: "default",
+            duration: 5000,
+          })
+        } catch (e) {
+          console.error("Could not show rank up notification:", e)
+        }
+      }, 500)
+    }
+
     return newTotal
   } catch (error) {
     console.error("Error updating total points:", error)
     return 0
   }
+}
+
+// Helper function to get rank from points
+function getRankFromPoints(points: number) {
+  const { ranks } = require("./user-utils")
+
+  // Find the highest rank the user qualifies for
+  for (let i = ranks.length - 1; i >= 0; i--) {
+    if (points >= ranks[i].minPoints) {
+      return ranks[i]
+    }
+  }
+
+  // Default to Novice
+  return ranks[0]
 }
 
 // Get all completed workouts with error handling
@@ -265,7 +302,7 @@ export function getCompletedWorkoutCount() {
 export function getTotalExerciseCount() {
   const workouts = getCompletedWorkouts()
   // Estimate 5 exercises per workout
-  return workouts.length * 5
+  return workouts.lengthth * 5
 }
 
 // Initialize user data if not already present

@@ -110,11 +110,13 @@ export default function RankSystem({
             <div className={`h-24 w-24 rounded-full flex items-center justify-center ${currentRankData.badge}`}>
               <div className="text-4xl text-white">🏆</div>
             </div>
-            <div className="absolute -top-1 -right-1 bg-background rounded-full p-1">
-              <div className="bg-yellow-400 rounded-full p-1">
-                <div className="text-sm">⭐</div>
+            {currentPoints > 0 && (
+              <div className="absolute -top-1 -right-1 bg-background rounded-full p-1">
+                <div className="bg-yellow-400 rounded-full p-1">
+                  <div className="text-sm">⭐</div>
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         </div>
 
@@ -141,7 +143,7 @@ export default function RankSystem({
           <ul className="text-xs space-y-1 text-muted-foreground">
             <li>• Complete daily workouts: 10 points</li>
             <li>• Maintain a streak: 5 points per day</li>
-            <li>• Achieve a new skill level: 25 points</li>
+            <li>• Achieve a new skill level: 25-300 points</li>
             <li>• Complete weekly challenges: 50 points</li>
             <li>• Track nutrition goals: 5 points per day</li>
           </ul>

@@ -26,8 +26,8 @@ import RepCounter from "../components/rep-counter"
 import { motion } from "framer-motion"
 import { toast } from "@/components/ui/use-toast"
 import Leaderboard from "../components/leaderboard"
+import RankUpNotification from "../components/rank-up-notification"
 import {
-  calculateUserPoints,
   getUserRank,
   getNextRank,
   calculateProgressToNextRank,
@@ -71,6 +71,7 @@ export default function DashboardPage() {
   const [workoutDuration, setWorkoutDuration] = useState(0)
   const [workoutCompleted, setWorkoutCompleted] = useState(false)
   const [earnedPoints, setEarnedPoints] = useState(0)
+  const [rankUpNotification, setRankUpNotification] = useState<string | null>(null)
   const [stats, setStats] = useState({
     workouts: 0,
     achievements: 0,
@@ -116,13 +117,7 @@ export default function DashboardPage() {
 
       // Get total points (either from localStorage or calculate)
       const storedPoints = getTotalPoints()
-      if (storedPoints > 0) {
-        setUserPoints(storedPoints)
-      } else {
-        // Calculate user points based on name and experience
-        const calculatedPoints = calculateUserPoints(user, experience)
-        setUserPoints(calculatedPoints)
-      }
+      setUserPoints(storedPoints)
 
       // Get recommended skills based on user preferences
       const skills = getRecommendedSkills(experience, goal)
@@ -201,6 +196,9 @@ export default function DashboardPage() {
       // Generate a unique ID for the workout
       const workoutId = `workout-${Date.now()}`
 
+      // Get current rank before adding points
+      const currentRank = getUserRank(userPoints)
+
       // Save the completed workout
       const completedWorkout = saveCompletedWorkout(
         workoutId,
@@ -218,10 +216,18 @@ export default function DashboardPage() {
       }
 
       // Update state
+      const newPoints = getTotalPoints()
       setCompletedWorkouts([...completedWorkouts, completedWorkout])
-      setUserPoints(getTotalPoints())
+      setUserPoints(newPoints)
       setEarnedPoints(completedWorkout.points)
       setWorkoutCompleted(true)
+
+      // Check if user ranked up
+      const newRank = getUserRank(newPoints)
+      if (newRank.name !== currentRank.name) {
+        // Show rank up notification
+        setRankUpNotification(newRank.name)
+      }
 
       // Update stats
       setStats((prev) => ({
@@ -300,6 +306,7 @@ export default function DashboardPage() {
   // Get user's current rank
   const userRankData = getUserRank(userPoints)
   const nextRankData = getNextRank(userRankData.name)
+  const rankProgress = calculateProgressToNextRank(userPoints, userRankData, nextRankData)
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -401,10 +408,7 @@ export default function DashboardPage() {
                       <span className={userRankData.textColor}>{userRankData.name}</span>
                       <span>{nextRankData.name}</span>
                     </div>
-                    <Progress
-                      value={calculateProgressToNextRank(userPoints, userRankData, nextRankData)}
-                      className={`h-2 ${userRankData.color}`}
-                    />
+                    <Progress value={rankProgress} className={`h-2 ${userRankData.color}`} />
                     <p className="text-xs text-center text-muted-foreground">
                       {nextRankData.minPoints - userPoints} more points needed for next rank
                     </p>
@@ -488,6 +492,7 @@ export default function DashboardPage() {
                           <motion.div
                             key={index}
                             whileHover={{ scale: 1.03, y: -5 }}
+                            transition={{ type: "spring", stiffness: 400, scale: 1.03, y: -5 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                           >
                             <Card className={`overflow-hidden ${isCompleted ? "border-green-500" : ""}`}>
@@ -691,6 +696,11 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Rank Up Notification */}
+      {rankUpNotification && (
+        <RankUpNotification rankName={rankUpNotification} onClose={() => setRankUpNotification(null)} />
+      )}
     </div>
   )
 }

@@ -53,21 +53,8 @@ export const ranks = [
 
 // Calculate user points based on name and experience
 export function calculateUserPoints(name: string | null, experience: string | null): number {
-  if (!name) return 0
-
-  // Base points from name length (just for demonstration)
-  let points = name.length * 10
-
-  // Points from experience level
-  if (experience === "beginner") {
-    points += 50
-  } else if (experience === "intermediate") {
-    points += 150
-  } else if (experience === "advanced") {
-    points += 300
-  }
-
-  return points
+  // New users start with 0 points - they must earn points through activities
+  return 0
 }
 
 // Get user rank based on points
